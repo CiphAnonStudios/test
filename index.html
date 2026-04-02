@@ -1,1 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RepQuest - Fitness RPG</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* --- GENERAL --- */
+body {margin:0; font-family:'Poppins',sans-serif; background:#f5f5f5; color:#333;}
+button,input,select{font-family:'Poppins',sans-serif;}
 
+/* --- LOGIN --- */
+#login{max-width:400px; margin:50px auto; background:white; padding:30px; border-radius:15px; box-shadow:0 8px 20px rgba(0,0,0,0.1);}
+#login h1{text-align:center; color:#4caf50;}
+#login input, #login select, #login button{width:90%; margin:10px auto; padding:12px; border-radius:10px; border:1px solid #ddd; font-size:1rem;}
+#login button{background:#4caf50; color:white; border:none; cursor:pointer; transition:0.3s;}
+#login button:hover{background:#45a047;}
+
+/* --- MAIN CONTAINER --- */
+#main{max-width:700px; margin:20px auto; padding:20px;}
+header{display:flex; justify-content:space-between; align-items:center; background:white; padding:15px; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.1); position:sticky; top:0; z-index:10;}
+header h2{margin:0;}
+header p{margin:3px 0 0;}
+header button{background:#e53935; padding:8px 15px; border:none; color:white; border-radius:10px; cursor:pointer; transition:0.3s;}
+header button:hover{background:#d32f2f;}
+
+/* --- SECTION CARDS --- */
+.card{background:white; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.05); margin:15px 0; padding:15px;}
+.card h3{margin-top:0;}
+.progress-bar{width:100%; height:20px; background:#ddd; border-radius:10px; margin:10px 0; overflow:hidden;}
+.progress-fill{height:100%; background:#4caf50; width:0%; transition:0.5s; border-radius:10px;}
+.collapsible{background:#f0f0f0; cursor:pointer; padding:12px; border:none; border-radius:10px; width:100%; text-align:left; font-size:1rem; margin-top:5px; transition:0.3s;}
+.collapsible:hover{background:#e0e0e0;}
+.active{background:#d0d0d0;}
+.content{display:none; padding:10px 0 0 0;}
+
+/* --- WORKOUT LIST --- */
+#workout-list{max-height:250px; overflow-y:auto; list-style:none; padding:0; margin:0;}
+#workout-list li{background:#f9f9f9; margin:5px 0; padding:10px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.05);}
+
+/* --- ACHIEVEMENTS & LEADERBOARD --- */
+ul{padding-left:20px;}
+#achievements-list li, #leaderboard-list li{margin:5px 0; padding:8px; border-radius:8px; background:#f9f9f9; box-shadow:0 2px 6px rgba(0,0,0,0.05);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+<h1>RepQuest</h1>
+<input type="text" id="username" placeholder="Username">
+<input type="password" id="password" placeholder="Password">
+<button onclick="signup()">Sign Up</button>
+<button onclick="login()">Login</button>
+<p id="login-msg" style="text-align:center;color:red;"></p>
+</div>
+
+<!-- MAIN -->
+<div id="main" style="display:none;">
+
+<header>
+<div>
+<h2><span id="display-name"></span></h2>
+<p>XP: <span id="xp-count">0</span> | Level: <span id="level-count">1</span></p>
+</div>
+<button onclick="logout()">Logout</button>
+</header>
+
+<!-- PROGRESS & RANK -->
+<div class="card">
+<h3>Progress & Rank</h3>
+<div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+<p>Rank: <span id="rank">Novice</span></p>
+</div>
+
+<!-- STREAK -->
+<div class="card">
+<h3>Workout Streak</h3>
+<p>Days in a row: <span id="streak-count">0</span></p>
+</div>
+
+<!-- TIMER -->
+<div class="card">
+<h3>Workout Timer</h3>
+<p id="timer-display" style="font-size:1.5rem;">00:00</p>
+<button onclick="startTimer()">Start</button>
+<button onclick="pauseTimer()">Pause</button>
+<button onclick="resetTimer()">Reset</button>
+</div>
+
+<!-- WORKOUT -->
+<div class="card">
+<h3>Add Workout</h3>
+<select id="workout-type">
+<option value="calisthenics">Calisthenics</option>
+<option value="gym">Gym / Machines</option>
+</select>
+<input type="text" id="exercise" placeholder="Exercise Name">
+<input type="number" id="sets" placeholder="Sets">
+<input type="number" id="reps" placeholder="Reps / Weight">
+<input type="number" id="breaks" placeholder="Breaks (seconds)">
+<button onclick="addWorkout()">Add Exercise</button>
+<ul id="workout-list"></ul>
+</div>
+
+<!-- ACHIEVEMENTS -->
+<div class="card">
+<h3>Achievements</h3>
+<ul id="achievements-list"></ul>
+</div>
+
+<!-- LEADERBOARD -->
+<div class="card">
+<h3>Leaderboard</h3>
+<ul id="leaderboard-list"></ul>
+</div>
+
+</div>
+
+<script>
+// --- LOGIN ---
+function signup(){
+const u=document.getElementById("username").value;
+const p=document.getElementById("password").value;
+if(!u||!p)return alert("Enter username & password");
+if(localStorage.getItem(u))return alert("User exists!");
+localStorage.setItem(u,p);
+localStorage.setItem(u+"_xp","0");
+localStorage.setItem(u+"_streak","0");
+localStorage.setItem(u+"_workouts",JSON.stringify([]));
+alert("Sign Up successful!");}
+
+function login(){
+const u=document.getElementById("username").value;
+const p=document.getElementById("password").value;
+if(localStorage.getItem(u)===p){
+localStorage.setItem("currentUser",u); showMain();
+}else document.getElementById("login-msg").innerText="Invalid credentials!";
+}
+
+function logout(){localStorage.removeItem("currentUser"); document.getElementById("main").style.display="none"; document.getElementById("login").style.display="block";}
+
+// --- MAIN ---
+function showMain(){
+document.getElementById("login").style.display="none"; document.getElementById("main").style.display="block";
+const u=localStorage.getItem("currentUser"); document.getElementById("display-name").innerText=u;
+updateProgress(); updateStreak(); loadWorkouts(); updateLeaderboard(); checkAchievements();
+}
+
+// --- PROGRESS & RANK ---
+function updateProgress(){
+const u=localStorage.getItem("currentUser");
+let xp=parseInt(localStorage.getItem(u+"_xp")||"0");
+let level=Math.floor(xp/100)+1;
+let fill=xp%100;
+document.getElementById("xp-count").innerText=xp;
+document.getElementById("level-count").innerText=level;
+document.getElementById("progress-fill").style.width=fill+"%";
+const ranks=["Novice","Apprentice","Warrior","Elite","Master","Legend"];
+let rankIndex=Math.min(Math.floor(level/2),ranks.length-1);
+document.getElementById("rank").innerText=ranks[rankIndex];
+}
+
+// --- STREAK ---
+function updateStreak(){
+const u=localStorage.getItem("currentUser");
+let streak=parseInt(localStorage.getItem(u+"_streak")||"0");
+document.getElementById("streak-count").innerText=streak;
+}
+
+// --- TIMER ---
+let timer; let time=0; let running=false;
+function startTimer(){if(!running){running=true; timer=setInterval(()=>{time++; let m=String(Math.floor(time/60)).padStart(2,"0"); let s=String(time%60).padStart(2,"0"); document.getElementById("timer-display").innerText=`${m}:${s}`;},1000);}}
+function pauseTimer(){clearInterval(timer); running=false;}
+function resetTimer(){clearInterval(timer); running=false; time=0; document.getElementById("timer-display").innerText="00:00";}
+
+// --- WORKOUTS ---
+function addWorkout(){
+const t=document.getElementById("workout-type").value;
+const n=document.getElementById("exercise").value;
+const s=document.getElementById("sets").value;
+const r=document.getElementById("reps").value;
+const b=document.getElementById("breaks").value||0;
+if(!n||!s||!r)return alert("Fill all fields");
+const u=localStorage.getItem("currentUser");
+let ws=JSON.parse(localStorage.getItem(u+"_workouts")||"[]");
+ws.push({type:t,name:n,sets:s,reps:r,breaks:b});
+localStorage.setItem(u+"_workouts",JSON.stringify(ws));
+loadWorkouts();
+let xp=parseInt(localStorage.getItem(u+"_xp")||"0");
+xp+=parseInt(s)*parseInt(r);
+localStorage.setItem(u+"_xp",xp);
+updateProgress();
+let streak=parseInt(localStorage.getItem(u+"_streak")||"0");
+streak++; localStorage.setItem(u+"_streak",streak); updateStreak();
+checkAchievements(); updateLeaderboard();
+document.getElementById("exercise").value=""; document.getElementById("sets").value=""; document.getElementById("reps").value=""; document.getElementById("breaks").value="";
+}
+
+function loadWorkouts(){
+const u=localStorage.getItem("currentUser");
+let ws=JSON.parse(localStorage.getItem(u+"_workouts")||"[]");
+const list=document.getElementById("workout-list"); list.innerHTML="";
+ws.forEach(w=>{const li=document.createElement("li"); li.innerText=`[${w.type}] ${w.name}: ${w.sets}x${w.reps} (Break:${w.breaks}s)`; list.appendChild(li);});
+}
+
+// --- ACHIEVEMENTS ---
+function checkAchievements(){
+const u=localStorage.getItem("currentUser");
+let xp=parseInt(localStorage.getItem(u+"_xp")||"0");
+let streak=parseInt(localStorage.getItem(u+"_streak")||"0");
+const unlocked=[];
+if(xp>0)unlocked.push("First Workout");
+if(xp>=100)unlocked.push("100 XP");
+if(streak>=7)unlocked.push("7 Day Streak");
+let level=Math.floor(xp/100)+1;
+if(level>=5)unlocked.push("Level 5");
+if(level>=10)unlocked.push("Level 10");
+const list=document.getElementById("achievements-list"); list.innerHTML="";
+unlocked.forEach(a=>{const li=document.createElement("li"); li.innerText=a; list.appendChild(li);});
+}
+
+// --- LEADERBOARD ---
+function updateLeaderboard(){
+const leaderboard=document.getElementById("leaderboard-list"); leaderboard.innerHTML="";
+const users=Object.keys(localStorage).filter(k=>!k.includes("_")&&k!=="currentUser");
+let data=[];
+users.forEach(u=>{data.push({user:u,xp:parseInt(localStorage.getItem(u+"_xp")||0)});});
+data.sort((a,b)=>b.xp-a.xp);
+data.forEach(d=>{const li=document.createElement("li"); li.innerText=`${d.user}: ${d.xp} XP`; leaderboard.appendChild(li);});
+}
+</script>
+
+</body>
+</html>

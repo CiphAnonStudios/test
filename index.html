@@ -3,20 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RepQuest Push-Up Tracker</title>
+<title>Ultimate Calisthenics Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
 body{margin:0;font-family:'Poppins',sans-serif;background:#f4f7fb;}
 header{position:sticky;top:0;background:white;padding:15px;box-shadow:0 4px 15px rgba(0,0,0,0.1);}
 header h2{margin:0;}
-.container{max-width:500px;margin:auto;padding:15px;}
+.container{max-width:600px;margin:auto;padding:15px;}
 .card{background:white;border-radius:20px;padding:15px;margin-top:20px;box-shadow:0 8px 20px rgba(0,0,0,0.05);}
 button{width:100%;padding:12px;border:none;border-radius:15px;background:#58cc02;color:white;font-size:1rem;font-weight:600;margin-top:10px;cursor:pointer;}
 button:hover{background:#45a01f;}
+input, select{width:100%;padding:12px;border-radius:12px;border:1px solid #ddd;margin-top:10px;}
 .progress-bar{height:12px;background:#ddd;border-radius:10px;overflow:hidden;margin-top:5px;}
 .progress-fill{height:100%;background:#58cc02;width:0%;}
 .path{position:relative;margin-top:20px;}
-.step{width:75px;height:75px;border-radius:50%;background:#e5e5e5;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:0.9rem;position:relative;margin:20px auto;cursor:pointer;transition:0.3s;text-align:center;padding:5px;}
+.step{width:75px;height:75px;border-radius:50%;background:#e5e5e5;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:0.9rem;position:relative;margin:20px auto;cursor:pointer;text-align:center;padding:5px;transition:0.3s;}
 .completed{background:#58cc02;color:white;}
 .current{background:#ffd93b;animation:pulse 1.5s infinite;}
 @keyframes pulse{0%{transform:scale(1);}50%{transform:scale(1.08);}100%{transform:scale(1);}}
@@ -25,41 +26,47 @@ button:hover{background:#45a01f;}
 <body>
 
 <header>
-<h2>RepQuest: Push-Up Tracker</h2>
+<h2>Ultimate Calisthenics Tracker</h2>
 <p>🔥 Current Streak: <span id="streak">0</span> days | 🏆 Best Streak: <span id="bestStreak">0</span> days</p>
-<p>📅 Day <span id="day">1</span> | ✅ Completed: <span id="completedCount">0</span>/10 sets</p>
+<p>📅 Day <span id="day">1</span> | ✅ Completed: <span id="completedCount">0</span>/<span id="totalSteps">0</span> sets</p>
 <div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
 </header>
 
 <div class="container">
+
 <div class="card">
-<h3>Push-Up Routine</h3>
+<h3>Create / Add Workout</h3>
+<input id="exercise" placeholder="Exercise (Push-ups)">
+<input id="sets" type="number" placeholder="Sets">
+<input id="reps" type="number" placeholder="Reps per set">
+<button onclick="addExercise()">Add Exercise</button>
+<select id="selectWorkout"></select>
+<button onclick="startWorkout()">Start Selected Workout</button>
+</div>
+
+<div class="card">
+<h3>Workout Path</h3>
 <div id="path" class="path"></div>
+<p>⏱ Rest timer: <span id="timer">0</span> sec</p>
 <button onclick="resetDay()">Reset Today</button>
 </div>
+
+<div class="card">
+<h3>Achievements</h3>
+<ul id="achievements"></ul>
+</div>
+
 </div>
 
 <script>
-// ===== DATA =====
-const steps=[
-  "Normal push-ups ×10",
-  "Wide push-ups ×10",
-  "Diamond push-ups ×10",
-  "Reverse hand placement push-ups ×10",
-  "Pike push-ups ×10",
-  "Decline push-ups ×10",
-  "Archer push-ups ×10",
-  "Explosive push-ups ×10",
-  "Spiderman push-ups ×10",
-  "Slow/tempo push-ups ×10"
-];
-
-// ===== LOCAL STORAGE =====
+// ===== DATA STORAGE =====
+let workouts = JSON.parse(localStorage.getItem("workouts")) || {};
 let completed = parseInt(localStorage.getItem("completed")) || 0;
 let streak = parseInt(localStorage.getItem("streak")) || 0;
 let bestStreak = parseInt(localStorage.getItem("bestStreak")) || 0;
 let lastDate = localStorage.getItem("lastDate") || "";
 let dayNumber = parseInt(localStorage.getItem("dayNumber")) || 1;
+let currentWorkout = localStorage.getItem("currentWorkout") || "";
 
 // ===== DAILY RESET =====
 let today = new Date().toDateString();
@@ -72,31 +79,73 @@ if(lastDate !== today){
   saveData();
 }
 
-// ===== SAVE FUNCTION =====
+// ===== SAVE =====
 function saveData(){
+  localStorage.setItem("workouts",JSON.stringify(workouts));
   localStorage.setItem("completed",completed);
   localStorage.setItem("streak",streak);
   localStorage.setItem("bestStreak",bestStreak);
   localStorage.setItem("lastDate",lastDate);
   localStorage.setItem("dayNumber",dayNumber);
+  localStorage.setItem("currentWorkout",currentWorkout);
+}
+
+// ===== ADD EXERCISE =====
+function addExercise(){
+  const ex=document.getElementById("exercise").value.trim();
+  const sets=parseInt(document.getElementById("sets").value);
+  const reps=parseInt(document.getElementById("reps").value);
+  if(!ex || !sets || !reps){alert("Fill all fields"); return;}
+  const name = prompt("Name your workout:");
+  if(!name) return;
+  workouts[name]=[];
+  for(let i=0;i<sets;i++){workouts[name].push({name:ex,reps:reps});}
+  saveData();
+  updateWorkoutSelect();
+  alert("Workout saved!");
+}
+
+// ===== UPDATE WORKOUT SELECT =====
+function updateWorkoutSelect(){
+  const sel=document.getElementById("selectWorkout");
+  sel.innerHTML="";
+  Object.keys(workouts).forEach(w=>{
+    const opt=document.createElement("option"); opt.value=w; opt.innerText=w; sel.appendChild(opt);
+  });
+}
+updateWorkoutSelect();
+
+// ===== START WORKOUT =====
+function startWorkout(){
+  const sel=document.getElementById("selectWorkout");
+  const name = sel.value;
+  if(!name) return alert("Select a workout");
+  currentWorkout=name;
+  completed=0;
+  saveData();
+  renderPath();
+  updateUI();
 }
 
 // ===== RENDER PATH =====
 function renderPath(){
-  const pathDiv = document.getElementById("path");
-  pathDiv.innerHTML = "";
-  steps.forEach((step,i)=>{
+  const pathDiv=document.getElementById("path");
+  pathDiv.innerHTML="";
+  if(!currentWorkout) return;
+  const steps=workouts[currentWorkout];
+  document.getElementById("totalSteps").innerText=steps.length;
+  steps.forEach((s,i)=>{
     const div=document.createElement("div");
     div.classList.add("step");
     if(i<completed) div.classList.add("completed");
     else if(i===completed) div.classList.add("current");
-    div.innerText = step;
-    div.onclick = ()=>{
+    div.innerText=s.name+"\n×"+s.reps;
+    div.onclick=()=>{
       if(i===completed){
         completed++;
         saveData();
-        updateUI();
         renderPath();
+        updateUI();
         if(completed===steps.length) alert("💪 Day "+dayNumber+" DONE! Keep streak going! 🔥");
       }
     };
@@ -110,7 +159,10 @@ function updateUI(){
   document.getElementById("bestStreak").innerText=bestStreak;
   document.getElementById("day").innerText=dayNumber;
   document.getElementById("completedCount").innerText=completed;
-  document.getElementById("progress").style.width=(completed/steps.length*100)+"%";
+  const total = currentWorkout ? workouts[currentWorkout].length : 0;
+  document.getElementById("totalSteps").innerText=total;
+  document.getElementById("progress").style.width = total ? (completed/total*100)+"%" : "0%";
+  renderAchievements();
 }
 
 // ===== RESET TODAY =====
@@ -123,8 +175,20 @@ function resetDay(){
   }
 }
 
+// ===== ACHIEVEMENTS =====
+function renderAchievements(){
+  const list=document.getElementById("achievements");
+  list.innerHTML="";
+  if(completed>=10 && !workouts[currentWorkout]?.achieved10){workouts[currentWorkout].achieved10=true; alert("Achievement: 10 sets completed!");}
+  Object.keys(workouts).forEach(w=>{
+    const a=document.createElement("li");
+    a.innerText=w+": "+(workouts[w].achieved10?"🏆 10 sets completed":"");
+    list.appendChild(a);
+  });
+}
+
 // ===== INIT =====
-renderPath();
+if(currentWorkout) renderPath();
 updateUI();
 </script>
 

@@ -3,229 +3,126 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RepQuest</title>
+<title>My Workout Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
 body{margin:0;font-family:'Poppins',sans-serif;background:#f4f7fb;}
-header{position:sticky;top:0;background:white;padding:15px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 15px rgba(0,0,0,0.1);}
+header{position:sticky;top:0;background:white;padding:15px;box-shadow:0 4px 15px rgba(0,0,0,0.1);}
+header h2{margin:0;}
 .container{max-width:500px;margin:auto;padding:15px;}
-.progress-bar{height:12px;background:#ddd;border-radius:10px;overflow:hidden;margin-top:5px;}
-.progress-fill{height:100%;background:#58cc02;width:0%;}
 .card{background:white;border-radius:20px;padding:15px;margin-top:20px;box-shadow:0 8px 20px rgba(0,0,0,0.05);}
 button{width:100%;padding:12px;border:none;border-radius:15px;background:#58cc02;color:white;font-size:1rem;font-weight:600;margin-top:10px;cursor:pointer;}
 button:hover{background:#45a01f;}
 input{width:100%;padding:12px;border-radius:12px;border:1px solid #ddd;margin-top:10px;}
+.progress-bar{height:12px;background:#ddd;border-radius:10px;overflow:hidden;margin-top:5px;}
+.progress-fill{height:100%;background:#58cc02;width:0%;}
 .path{position:relative;margin-top:20px;}
-.line{position:absolute;width:6px;background:#ddd;left:50%;transform:translateX(-50%);top:0;bottom:0;border-radius:10px;}
 .step{width:75px;height:75px;border-radius:50%;background:#e5e5e5;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:1.2rem;position:relative;margin:40px auto;cursor:pointer;transition:0.3s;}
-.step.left{margin-left:20%;}
-.step.right{margin-right:20%;}
-.completed{background:#58cc02;color:white;box-shadow:0 5px 0 #3ea001;}
-.current{background:#ffd93b;box-shadow:0 5px 0 #e6b800;animation:pulse 1.5s infinite;}
+.completed{background:#58cc02;color:white;}
+.current{background:#ffd93b;animation:pulse 1.5s infinite;}
 @keyframes pulse{0%{transform:scale(1);}50%{transform:scale(1.08);}100%{transform:scale(1);}}
-.completed::after{content:"✔";position:absolute;bottom:-10px;background:white;color:#58cc02;border-radius:50%;width:25px;height:25px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;}
-.hidden{display:none;}
 </style>
 </head>
 <body>
 
 <header>
-<div>
-<h2>RepQuest</h2>
-<p>XP: <span id="xp">0</span> | Lv <span id="level">1</span></p>
-</div>
-<div>🔥 <span id="streak">0</span></div>
+<h2>My Workout Tracker</h2>
+<p>XP: <span id="xp">0</span> | Streak: <span id="streak">0</span></p>
 </header>
 
 <div class="container">
-
-<!-- LOGIN / SIGNUP -->
-<div id="auth" class="card">
-<h3>Login / Signup</h3>
-<input id="username" placeholder="Username">
-<input id="password" type="password" placeholder="Password">
-<button onclick="loginSignup()">Enter</button>
-<p id="auth-msg"></p>
-</div>
-
-<!-- MAIN APP -->
-<div id="app" class="hidden">
-
 <div class="card">
-<h3>Progress</h3>
-<div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
-<p>Rank: <span id="rank"></span></p>
-</div>
-
-<div class="card">
-<h3>Create Workout</h3>
-<input id="exercise" placeholder="Push-ups">
+<h3>Create Your Workout Plan</h3>
+<input id="exercise" placeholder="Exercise (Push-ups)">
 <input id="sets" type="number" placeholder="Sets">
 <input id="reps" type="number" placeholder="Reps">
-<button onclick="createPlan()">Save Plan</button>
+<button onclick="savePlan()">Save Plan</button>
 </div>
 
 <div class="card">
 <h3>Workout Path</h3>
 <button onclick="startWorkout()">Start Workout</button>
-<div class="path">
-<div class="line"></div>
-<div id="path"></div>
-</div>
-</div>
-
-<div class="card">
-<h3>Workout Timer</h3>
-<p id="timer">00:00</p>
-<button onclick="startTimer()">Start Timer</button>
-<button onclick="stopTimer()">Stop Timer</button>
-</div>
-
-<div class="card">
-<h3>Achievements</h3>
-<ul id="achievements"></ul>
-</div>
-
+<div id="path" class="path"></div>
 </div>
 </div>
 
 <script>
-// ===== LOCALSTORAGE LOGIN =====
-let currentUser = localStorage.getItem("currentUser");
-let users = JSON.parse(localStorage.getItem("users"))||{};
-function loginSignup(){
-  let u = document.getElementById("username").value.trim();
-  let p = document.getElementById("password").value.trim();
-  if(!u||!p)return alert("Fill username/password");
+let plan = JSON.parse(localStorage.getItem("plan")) || [];
+let completed = parseInt(localStorage.getItem("completed")) || 0;
+let xp = parseInt(localStorage.getItem("xp")) || 0;
+let streak = parseInt(localStorage.getItem("streak")) || 0;
+let lastDate = localStorage.getItem("lastDate") || "";
 
-  if(users[u]){
-    if(users[u].password !== p){document.getElementById("auth-msg").innerText="Wrong password"; return;}
-  } else {
-    users[u] = {password:p, xp:0, streak:0, lastDate:"", plan:[], completed:0, achievements:[]};
-    localStorage.setItem("users", JSON.stringify(users));
-  }
-  currentUser = u;
-  localStorage.setItem("currentUser", currentUser);
-  document.getElementById("auth").classList.add("hidden");
-  document.getElementById("app").classList.remove("hidden");
-  loadUser();
+// Daily reset
+let today = new Date().toDateString();
+if(lastDate !== today){
+  completed = 0;
+  lastDate = today;
+  streak++;
+  saveData();
 }
 
-// ===== USER DATA =====
-let xp, streak, completed, plan, lastDate, achievements;
-function loadUser(){
-  let u = users[currentUser];
-  xp = u.xp; streak = u.streak; completed = 0;
-  plan = u.plan||[];
-  lastDate = u.lastDate||"";
-  achievements = u.achievements||[];
-  checkDaily();
-  updateUI();
+// Save everything
+function saveData(){
+  localStorage.setItem("plan", JSON.stringify(plan));
+  localStorage.setItem("completed", completed);
+  localStorage.setItem("xp", xp);
+  localStorage.setItem("streak", streak);
+  localStorage.setItem("lastDate", lastDate);
 }
 
-// ===== DAILY RESET =====
-function checkDaily(){
-  let today = new Date().toDateString();
-  if(lastDate!==today){
-    completed=0;
-    lastDate=today;
-    streak++; // count streak for daily login
-    saveUser();
-  }
-}
-
-// ===== SAVE =====
-function saveUser(){
-  let u = users[currentUser];
-  u.xp = xp; u.streak = streak; u.completed=completed; u.plan=plan; u.lastDate=lastDate; u.achievements=achievements;
-  users[currentUser]=u;
-  localStorage.setItem("users",JSON.stringify(users));
-}
-
-// ===== UI =====
-function updateUI(){
-  document.getElementById("xp").innerText=xp;
-  let level=Math.floor(xp/100)+1;
-  document.getElementById("level").innerText=level;
-  document.getElementById("progress").style.width=(xp%100)+"%";
-
-  const ranks=["Novice","Apprentice","Warrior","Elite","Master","Legend"];
-  document.getElementById("rank").innerText=ranks[Math.min(Math.floor(level/2),ranks.length-1)];
-  document.getElementById("streak").innerText=streak;
-
-  renderPath();
-  renderAchievements();
-}
-
-// ===== CREATE PLAN =====
-function createPlan(){
-  const ex=document.getElementById("exercise").value;
-  const sets=parseInt(document.getElementById("sets").value);
-  const reps=parseInt(document.getElementById("reps").value);
-  if(!ex||!sets||!reps)return alert("Fill all fields");
-
-  plan=[];
-  for(let i=0;i<sets;i++){
-    plan.push({name:ex,reps:reps});
-  }
-  completed=0;
-  saveUser();
+// Save workout plan
+function savePlan(){
+  const ex = document.getElementById("exercise").value;
+  const sets = parseInt(document.getElementById("sets").value);
+  const reps = parseInt(document.getElementById("reps").value);
+  if(!ex || !sets || !reps){alert("Fill all fields"); return;}
+  plan = [];
+  for(let i=0;i<sets;i++){plan.push({name:ex,reps:reps});}
+  completed = 0;
+  saveData();
   alert("Workout plan saved!");
-  updateUI();
+  renderPath();
 }
 
-// ===== START WORKOUT =====
-function startWorkout(){completed=0;saveUser();updateUI();}
+// Start workout
+function startWorkout(){
+  completed = 0;
+  saveData();
+  renderPath();
+}
 
-// ===== PATH =====
+// Render path
 function renderPath(){
-  const path=document.getElementById("path");
-  path.innerHTML="";
+  const pathDiv = document.getElementById("path");
+  pathDiv.innerHTML = "";
   plan.forEach((p,i)=>{
-    const div=document.createElement("div");
+    const div = document.createElement("div");
     div.classList.add("step");
-    div.classList.add(i%2===0?"left":"right");
     if(i<completed) div.classList.add("completed");
     else if(i===completed) div.classList.add("current");
-    div.innerText=p.reps;
-    div.onclick=()=>{
+    div.innerText = p.reps;
+    div.onclick = ()=>{
       if(i===completed){
         completed++;
         xp+=10;
-        // ACHIEVEMENT EXAMPLE
-        if(xp>=50 && !achievements.includes("First 50 XP")) achievements.push("First 50 XP");
-        saveUser();
-        updateUI();
+        saveData();
+        renderPath();
+        updateHeader();
       }
-    }
-    path.appendChild(div);
+    };
+    pathDiv.appendChild(div);
   });
 }
 
-// ===== TIMER =====
-let timerInterval, seconds=0;
-function startTimer(){
-  clearInterval(timerInterval);
-  timerInterval=setInterval(()=>{seconds++;updateTimer();},1000);
-}
-function stopTimer(){clearInterval(timerInterval);}
-function updateTimer(){
-  let m=Math.floor(seconds/60).toString().padStart(2,"0");
-  let s=(seconds%60).toString().padStart(2,"0");
-  document.getElementById("timer").innerText=`${m}:${s}`;
+function updateHeader(){
+  document.getElementById("xp").innerText = xp;
+  document.getElementById("streak").innerText = streak;
 }
 
-// ===== ACHIEVEMENTS =====
-function renderAchievements(){
-  const list=document.getElementById("achievements");
-  list.innerHTML="";
-  achievements.forEach(a=>{
-    const li=document.createElement("li"); li.innerText=a; list.appendChild(li);
-  });
-}
-
-// ===== INIT =====
-if(currentUser){document.getElementById("auth").classList.add("hidden");document.getElementById("app").classList.remove("hidden");loadUser();}
+// Init
+renderPath();
+updateHeader();
 </script>
 
 </body>

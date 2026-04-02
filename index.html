@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Workout Tracker</title>
+<title>RepQuest Push-Up Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
 body{margin:0;font-family:'Poppins',sans-serif;background:#f4f7fb;}
@@ -13,11 +13,10 @@ header h2{margin:0;}
 .card{background:white;border-radius:20px;padding:15px;margin-top:20px;box-shadow:0 8px 20px rgba(0,0,0,0.05);}
 button{width:100%;padding:12px;border:none;border-radius:15px;background:#58cc02;color:white;font-size:1rem;font-weight:600;margin-top:10px;cursor:pointer;}
 button:hover{background:#45a01f;}
-input{width:100%;padding:12px;border-radius:12px;border:1px solid #ddd;margin-top:10px;}
 .progress-bar{height:12px;background:#ddd;border-radius:10px;overflow:hidden;margin-top:5px;}
 .progress-fill{height:100%;background:#58cc02;width:0%;}
 .path{position:relative;margin-top:20px;}
-.step{width:75px;height:75px;border-radius:50%;background:#e5e5e5;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:1.2rem;position:relative;margin:40px auto;cursor:pointer;transition:0.3s;}
+.step{width:75px;height:75px;border-radius:50%;background:#e5e5e5;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:0.9rem;position:relative;margin:20px auto;cursor:pointer;transition:0.3s;text-align:center;padding:5px;}
 .completed{background:#58cc02;color:white;}
 .current{background:#ffd93b;animation:pulse 1.5s infinite;}
 @keyframes pulse{0%{transform:scale(1);}50%{transform:scale(1.08);}100%{transform:scale(1);}}
@@ -26,103 +25,107 @@ input{width:100%;padding:12px;border-radius:12px;border:1px solid #ddd;margin-to
 <body>
 
 <header>
-<h2>My Workout Tracker</h2>
-<p>XP: <span id="xp">0</span> | Streak: <span id="streak">0</span></p>
+<h2>RepQuest: Push-Up Tracker</h2>
+<p>🔥 Current Streak: <span id="streak">0</span> days | 🏆 Best Streak: <span id="bestStreak">0</span> days</p>
+<p>📅 Day <span id="day">1</span> | ✅ Completed: <span id="completedCount">0</span>/10 sets</p>
+<div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
 </header>
 
 <div class="container">
 <div class="card">
-<h3>Create Your Workout Plan</h3>
-<input id="exercise" placeholder="Exercise (Push-ups)">
-<input id="sets" type="number" placeholder="Sets">
-<input id="reps" type="number" placeholder="Reps">
-<button onclick="savePlan()">Save Plan</button>
-</div>
-
-<div class="card">
-<h3>Workout Path</h3>
-<button onclick="startWorkout()">Start Workout</button>
+<h3>Push-Up Routine</h3>
 <div id="path" class="path"></div>
+<button onclick="resetDay()">Reset Today</button>
 </div>
 </div>
 
 <script>
-let plan = JSON.parse(localStorage.getItem("plan")) || [];
-let completed = parseInt(localStorage.getItem("completed")) || 0;
-let xp = parseInt(localStorage.getItem("xp")) || 0;
-let streak = parseInt(localStorage.getItem("streak")) || 0;
-let lastDate = localStorage.getItem("lastDate") || "";
+// ===== DATA =====
+const steps=[
+  "Normal push-ups ×10",
+  "Wide push-ups ×10",
+  "Diamond push-ups ×10",
+  "Reverse hand placement push-ups ×10",
+  "Pike push-ups ×10",
+  "Decline push-ups ×10",
+  "Archer push-ups ×10",
+  "Explosive push-ups ×10",
+  "Spiderman push-ups ×10",
+  "Slow/tempo push-ups ×10"
+];
 
-// Daily reset
+// ===== LOCAL STORAGE =====
+let completed = parseInt(localStorage.getItem("completed")) || 0;
+let streak = parseInt(localStorage.getItem("streak")) || 0;
+let bestStreak = parseInt(localStorage.getItem("bestStreak")) || 0;
+let lastDate = localStorage.getItem("lastDate") || "";
+let dayNumber = parseInt(localStorage.getItem("dayNumber")) || 1;
+
+// ===== DAILY RESET =====
 let today = new Date().toDateString();
 if(lastDate !== today){
   completed = 0;
   lastDate = today;
   streak++;
+  if(streak>bestStreak) bestStreak=streak;
+  dayNumber++;
   saveData();
 }
 
-// Save everything
+// ===== SAVE FUNCTION =====
 function saveData(){
-  localStorage.setItem("plan", JSON.stringify(plan));
-  localStorage.setItem("completed", completed);
-  localStorage.setItem("xp", xp);
-  localStorage.setItem("streak", streak);
-  localStorage.setItem("lastDate", lastDate);
+  localStorage.setItem("completed",completed);
+  localStorage.setItem("streak",streak);
+  localStorage.setItem("bestStreak",bestStreak);
+  localStorage.setItem("lastDate",lastDate);
+  localStorage.setItem("dayNumber",dayNumber);
 }
 
-// Save workout plan
-function savePlan(){
-  const ex = document.getElementById("exercise").value;
-  const sets = parseInt(document.getElementById("sets").value);
-  const reps = parseInt(document.getElementById("reps").value);
-  if(!ex || !sets || !reps){alert("Fill all fields"); return;}
-  plan = [];
-  for(let i=0;i<sets;i++){plan.push({name:ex,reps:reps});}
-  completed = 0;
-  saveData();
-  alert("Workout plan saved!");
-  renderPath();
-}
-
-// Start workout
-function startWorkout(){
-  completed = 0;
-  saveData();
-  renderPath();
-}
-
-// Render path
+// ===== RENDER PATH =====
 function renderPath(){
   const pathDiv = document.getElementById("path");
   pathDiv.innerHTML = "";
-  plan.forEach((p,i)=>{
-    const div = document.createElement("div");
+  steps.forEach((step,i)=>{
+    const div=document.createElement("div");
     div.classList.add("step");
     if(i<completed) div.classList.add("completed");
     else if(i===completed) div.classList.add("current");
-    div.innerText = p.reps;
+    div.innerText = step;
     div.onclick = ()=>{
       if(i===completed){
         completed++;
-        xp+=10;
         saveData();
+        updateUI();
         renderPath();
-        updateHeader();
+        if(completed===steps.length) alert("💪 Day "+dayNumber+" DONE! Keep streak going! 🔥");
       }
     };
     pathDiv.appendChild(div);
   });
 }
 
-function updateHeader(){
-  document.getElementById("xp").innerText = xp;
-  document.getElementById("streak").innerText = streak;
+// ===== UPDATE UI =====
+function updateUI(){
+  document.getElementById("streak").innerText=streak;
+  document.getElementById("bestStreak").innerText=bestStreak;
+  document.getElementById("day").innerText=dayNumber;
+  document.getElementById("completedCount").innerText=completed;
+  document.getElementById("progress").style.width=(completed/steps.length*100)+"%";
 }
 
-// Init
+// ===== RESET TODAY =====
+function resetDay(){
+  if(confirm("Reset today's progress?")){
+    completed=0;
+    saveData();
+    renderPath();
+    updateUI();
+  }
+}
+
+// ===== INIT =====
 renderPath();
-updateHeader();
+updateUI();
 </script>
 
 </body>

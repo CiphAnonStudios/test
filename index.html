@@ -3,193 +3,284 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultimate Calisthenics Tracker</title>
+<title>RepQuest</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
 <style>
-body{margin:0;font-family:'Poppins',sans-serif;background:#f4f7fb;}
-header{position:sticky;top:0;background:white;padding:15px;box-shadow:0 4px 15px rgba(0,0,0,0.1);}
-header h2{margin:0;}
-.container{max-width:600px;margin:auto;padding:15px;}
-.card{background:white;border-radius:20px;padding:15px;margin-top:20px;box-shadow:0 8px 20px rgba(0,0,0,0.05);}
-button{width:100%;padding:12px;border:none;border-radius:15px;background:#58cc02;color:white;font-size:1rem;font-weight:600;margin-top:10px;cursor:pointer;}
-button:hover{background:#45a01f;}
-input, select{width:100%;padding:12px;border-radius:12px;border:1px solid #ddd;margin-top:10px;}
-.progress-bar{height:12px;background:#ddd;border-radius:10px;overflow:hidden;margin-top:5px;}
-.progress-fill{height:100%;background:#58cc02;width:0%;}
-.path{position:relative;margin-top:20px;}
-.step{width:75px;height:75px;border-radius:50%;background:#e5e5e5;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:0.9rem;position:relative;margin:20px auto;cursor:pointer;text-align:center;padding:5px;transition:0.3s;}
-.completed{background:#58cc02;color:white;}
-.current{background:#ffd93b;animation:pulse 1.5s infinite;}
-@keyframes pulse{0%{transform:scale(1);}50%{transform:scale(1.08);}100%{transform:scale(1);}}
+body{
+  margin:0;
+  font-family:'Poppins',sans-serif;
+  background:#0f172a;
+  color:white;
+}
+
+/* NAV */
+.nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  display:flex;
+  background:#1e293b;
+}
+
+.nav div{
+  flex:1;
+  text-align:center;
+  padding:12px;
+  cursor:pointer;
+  opacity:0.6;
+}
+
+.nav .active{
+  opacity:1;
+  background:#22c55e;
+  color:black;
+}
+
+/* CONTAINER */
+.container{
+  max-width:500px;
+  margin:auto;
+  padding:20px;
+  padding-bottom:80px;
+}
+
+/* CARD */
+.card{
+  background:#1e293b;
+  border-radius:20px;
+  padding:20px;
+  margin-top:15px;
+}
+
+/* EXERCISE */
+.exercise{
+  display:flex;
+  justify-content:space-between;
+  padding:12px;
+  background:#334155;
+  border-radius:12px;
+  margin-bottom:8px;
+}
+
+.exercise.active{background:#22c55e;color:black;}
+.exercise.done{opacity:0.4;}
+
+/* BUTTON */
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:15px;
+  background:#22c55e;
+  color:black;
+  font-weight:600;
+  margin-top:10px;
+}
+
+/* PROGRESS */
+.progress{
+  height:10px;
+  background:#334155;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+.fill{
+  height:100%;
+  background:#22c55e;
+  width:0%;
+}
+
+/* TIMER */
+.timer{
+  text-align:center;
+  font-size:2rem;
+  margin-top:10px;
+}
 </style>
 </head>
-<body>
 
-<header>
-<h2>Ultimate Calisthenics Tracker</h2>
-<p>🔥 Current Streak: <span id="streak">0</span> days | 🏆 Best Streak: <span id="bestStreak">0</span> days</p>
-<p>📅 Day <span id="day">1</span> | ✅ Completed: <span id="completedCount">0</span>/<span id="totalSteps">0</span> sets</p>
-<div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
-</header>
+<body>
 
 <div class="container">
 
-<div class="card">
-<h3>Create / Add Workout</h3>
-<input id="exercise" placeholder="Exercise (Push-ups)">
-<input id="sets" type="number" placeholder="Sets">
-<input id="reps" type="number" placeholder="Reps per set">
-<button onclick="addExercise()">Add Exercise</button>
-<select id="selectWorkout"></select>
-<button onclick="startWorkout()">Start Selected Workout</button>
-</div>
+<!-- TRAIN TAB -->
+<div id="trainTab">
+<h2>Train</h2>
+
+<select id="workoutSelect">
+<option value="push">Push</option>
+<option value="pull">Pull</option>
+<option value="legs">Legs</option>
+</select>
 
 <div class="card">
-<h3>Workout Path</h3>
-<div id="path" class="path"></div>
-<p>⏱ Rest timer: <span id="timer">0</span> sec</p>
-<button onclick="resetDay()">Reset Today</button>
+<div id="exerciseList"></div>
+
+<div class="progress"><div id="fill" class="fill"></div></div>
+
+<button id="btn" onclick="next()">Start</button>
+<div id="timer" class="timer"></div>
 </div>
+</div>
+
+<!-- PROGRESS TAB -->
+<div id="progressTab" style="display:none">
+<h2>Progress</h2>
 
 <div class="card">
-<h3>Achievements</h3>
-<ul id="achievements"></ul>
+<p>XP: <span id="xp"></span></p>
+<p>Level: <span id="level"></span></p>
+<p>Streak: <span id="streak"></span></p>
+<p>Sessions Completed: <span id="sessions"></span></p>
 </div>
 
+</div>
+
+<!-- SETTINGS -->
+<div id="settingsTab" style="display:none">
+<h2>Settings</h2>
+
+<div class="card">
+<button onclick="resetData()">Reset All Data</button>
+</div>
+</div>
+
+</div>
+
+<!-- NAV -->
+<div class="nav">
+<div onclick="switchTab('train')" id="trainBtn" class="active">Train</div>
+<div onclick="switchTab('progress')" id="progressBtn">Progress</div>
+<div onclick="switchTab('settings')" id="settingsBtn">Settings</div>
 </div>
 
 <script>
-// ===== DATA STORAGE =====
-let workouts = JSON.parse(localStorage.getItem("workouts")) || {};
-let completed = parseInt(localStorage.getItem("completed")) || 0;
-let streak = parseInt(localStorage.getItem("streak")) || 0;
-let bestStreak = parseInt(localStorage.getItem("bestStreak")) || 0;
-let lastDate = localStorage.getItem("lastDate") || "";
-let dayNumber = parseInt(localStorage.getItem("dayNumber")) || 1;
-let currentWorkout = localStorage.getItem("currentWorkout") || "";
+// ===== WORKOUTS =====
+const workouts = {
+push:[
+["Push-ups",10],["Wide",10],["Diamond",10],["Pike",10],["Decline",10]
+],
+pull:[
+["Pull-ups",8],["Chin-ups",8],["Rows",10]
+],
+legs:[
+["Squats",15],["Lunges",10],["Jump Squats",10]
+]
+};
 
-// ===== DAILY RESET =====
-let today = new Date().toDateString();
-if(lastDate !== today){
-  completed = 0;
-  lastDate = today;
-  streak++;
-  if(streak>bestStreak) bestStreak=streak;
-  dayNumber++;
-  saveData();
+// ===== STATE =====
+let i=-1, resting=false, timerInt;
+
+// ===== STORAGE =====
+let xp=+localStorage.xp||0;
+let streak=+localStorage.streak||0;
+let sessions=+localStorage.sessions||0;
+let last=localStorage.last||"";
+
+// STREAK
+let today=new Date().toDateString();
+if(last!==today){streak++;localStorage.last=today;}
+
+// ===== UI =====
+function updateStats(){
+xpSpan.innerText=xp;
+level.innerText=Math.floor(xp/100)+1;
+streakSpan.innerText=streak;
+sessionsSpan.innerText=sessions;
 }
 
-// ===== SAVE =====
-function saveData(){
-  localStorage.setItem("workouts",JSON.stringify(workouts));
-  localStorage.setItem("completed",completed);
-  localStorage.setItem("streak",streak);
-  localStorage.setItem("bestStreak",bestStreak);
-  localStorage.setItem("lastDate",lastDate);
-  localStorage.setItem("dayNumber",dayNumber);
-  localStorage.setItem("currentWorkout",currentWorkout);
+// ===== RENDER =====
+function render(){
+let w=workouts[workoutSelect.value];
+exerciseList.innerHTML="";
+
+w.forEach((e,index)=>{
+let div=document.createElement("div");
+div.className="exercise";
+
+if(index<i) div.classList.add("done");
+if(index===i) div.classList.add("active");
+
+div.innerHTML=`<span>${e[0]}</span><span>${e[1]}</span>`;
+exerciseList.appendChild(div);
+});
+
+fill.style.width=((i+1)/w.length*100)+"%";
 }
 
-// ===== ADD EXERCISE =====
-function addExercise(){
-  const ex=document.getElementById("exercise").value.trim();
-  const sets=parseInt(document.getElementById("sets").value);
-  const reps=parseInt(document.getElementById("reps").value);
-  if(!ex || !sets || !reps){alert("Fill all fields"); return;}
-  const name = prompt("Name your workout:");
-  if(!name) return;
-  workouts[name]=[];
-  for(let i=0;i<sets;i++){workouts[name].push({name:ex,reps:reps});}
-  saveData();
-  updateWorkoutSelect();
-  alert("Workout saved!");
+// ===== TIMER =====
+function rest(){
+let t=45;
+resting=true;
+btn.disabled=true;
+
+timerInt=setInterval(()=>{
+timer.innerText=t+"s";
+t--;
+
+if(t<0){
+clearInterval(timerInt);
+timer.innerText="";
+resting=false;
+btn.disabled=false;
+}
+},1000);
 }
 
-// ===== UPDATE WORKOUT SELECT =====
-function updateWorkoutSelect(){
-  const sel=document.getElementById("selectWorkout");
-  sel.innerHTML="";
-  Object.keys(workouts).forEach(w=>{
-    const opt=document.createElement("option"); opt.value=w; opt.innerText=w; sel.appendChild(opt);
-  });
-}
-updateWorkoutSelect();
+// ===== FLOW =====
+function next(){
+if(resting) return;
 
-// ===== START WORKOUT =====
-function startWorkout(){
-  const sel=document.getElementById("selectWorkout");
-  const name = sel.value;
-  if(!name) return alert("Select a workout");
-  currentWorkout=name;
-  completed=0;
-  saveData();
-  renderPath();
-  updateUI();
-}
+let w=workouts[workoutSelect.value];
+i++;
 
-// ===== RENDER PATH =====
-function renderPath(){
-  const pathDiv=document.getElementById("path");
-  pathDiv.innerHTML="";
-  if(!currentWorkout) return;
-  const steps=workouts[currentWorkout];
-  document.getElementById("totalSteps").innerText=steps.length;
-  steps.forEach((s,i)=>{
-    const div=document.createElement("div");
-    div.classList.add("step");
-    if(i<completed) div.classList.add("completed");
-    else if(i===completed) div.classList.add("current");
-    div.innerText=s.name+"\n×"+s.reps;
-    div.onclick=()=>{
-      if(i===completed){
-        completed++;
-        saveData();
-        renderPath();
-        updateUI();
-        if(completed===steps.length) alert("💪 Day "+dayNumber+" DONE! Keep streak going! 🔥");
-      }
-    };
-    pathDiv.appendChild(div);
-  });
+if(i===0) btn.innerText="Complete";
+
+if(i>0) rest();
+
+if(i>=w.length){
+btn.innerText="Done";
+btn.disabled=true;
+xp+=50;
+sessions++;
+localStorage.xp=xp;
+localStorage.sessions=sessions;
+updateStats();
 }
 
-// ===== UPDATE UI =====
-function updateUI(){
-  document.getElementById("streak").innerText=streak;
-  document.getElementById("bestStreak").innerText=bestStreak;
-  document.getElementById("day").innerText=dayNumber;
-  document.getElementById("completedCount").innerText=completed;
-  const total = currentWorkout ? workouts[currentWorkout].length : 0;
-  document.getElementById("totalSteps").innerText=total;
-  document.getElementById("progress").style.width = total ? (completed/total*100)+"%" : "0%";
-  renderAchievements();
+render();
 }
 
-// ===== RESET TODAY =====
-function resetDay(){
-  if(confirm("Reset today's progress?")){
-    completed=0;
-    saveData();
-    renderPath();
-    updateUI();
-  }
+// ===== NAV =====
+function switchTab(tab){
+trainTab.style.display="none";
+progressTab.style.display="none";
+settingsTab.style.display="none";
+
+trainBtn.classList.remove("active");
+progressBtn.classList.remove("active");
+settingsBtn.classList.remove("active");
+
+if(tab==="train"){trainTab.style.display="block";trainBtn.classList.add("active");}
+if(tab==="progress"){progressTab.style.display="block";progressBtn.classList.add("active");}
+if(tab==="settings"){settingsTab.style.display="block";settingsBtn.classList.add("active");}
+
+updateStats();
 }
 
-// ===== ACHIEVEMENTS =====
-function renderAchievements(){
-  const list=document.getElementById("achievements");
-  list.innerHTML="";
-  if(completed>=10 && !workouts[currentWorkout]?.achieved10){workouts[currentWorkout].achieved10=true; alert("Achievement: 10 sets completed!");}
-  Object.keys(workouts).forEach(w=>{
-    const a=document.createElement("li");
-    a.innerText=w+": "+(workouts[w].achieved10?"🏆 10 sets completed":"");
-    list.appendChild(a);
-  });
+// ===== RESET =====
+function resetData(){
+if(confirm("Reset everything?")){
+localStorage.clear();
+location.reload();
+}
 }
 
-// ===== INIT =====
-if(currentWorkout) renderPath();
-updateUI();
+// INIT
+updateStats();
+render();
 </script>
 
 </body>

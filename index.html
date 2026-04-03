@@ -51,6 +51,7 @@ body{
   border-radius:25px;
   padding:25px;
   text-align:center;
+  margin-bottom:20px;
 }
 
 /* CIRCLE */
@@ -102,7 +103,6 @@ button{
 </head>
 
 <body>
-
 <div class="container">
 
 <div class="top">
@@ -127,15 +127,31 @@ button{
 
 <div class="timer" id="timer"></div>
 
-<button id="btn" onclick="next()">Start Workout</button>
-<button class="secondary" onclick="resetSession()">Reset Session</button>
+<button id="btn">Start Workout</button>
+<button class="secondary" id="resetBtn">Reset Session</button>
 
 </div>
 
 </div>
 
 <script>
-// WORKOUT
+document.addEventListener("DOMContentLoaded", ()=>{
+
+// ===== ELEMENTS =====
+const exercise = document.getElementById("exercise");
+const reps = document.getElementById("reps");
+const setinfo = document.getElementById("setinfo");
+const timer = document.getElementById("timer");
+const btn = document.getElementById("btn");
+const resetBtn = document.getElementById("resetBtn");
+const circle = document.getElementById("circle");
+const percent = document.getElementById("percent");
+const calendar = document.getElementById("calendar");
+const xpSpan = document.getElementById("xp");
+const level = document.getElementById("level");
+const streakSpan = document.getElementById("streak");
+
+// ===== WORKOUT =====
 const workout=[
 ["Push-ups",10],
 ["Wide Push-ups",10],
@@ -150,7 +166,7 @@ const workout=[
 
 let i=-1,resting=false,timerInt;
 
-// STORAGE
+// ===== STORAGE =====
 let xp=+localStorage.xp||0;
 let streak=+localStorage.streak||0;
 let last=localStorage.last||"";
@@ -163,14 +179,14 @@ if(last!==today){
   localStorage.last=today;
 }
 
-// UPDATE STATS
+// ===== UPDATE STATS =====
 function updateStats(){
   xpSpan.innerText=xp;
   level.innerText=Math.floor(xp/100)+1;
   streakSpan.innerText=streak;
 }
 
-// CIRCLE UPDATE
+// ===== UPDATE CIRCLE =====
 function updateCircle(){
   let percentVal=Math.max(0,(i+1)/workout.length);
   let deg=percentVal*360;
@@ -178,7 +194,7 @@ function updateCircle(){
   percent.innerText=Math.round(percentVal*100)+"%";
 }
 
-// RENDER
+// ===== RENDER WORKOUT =====
 function render(){
   if(i<0){
     exercise.innerText="Ready?";
@@ -212,7 +228,7 @@ function render(){
   updateCircle();
 }
 
-// REST
+// ===== REST =====
 function rest(){
   let t=45;
   resting=true;
@@ -231,39 +247,38 @@ function rest(){
   },1000);
 }
 
-// FLOW
-function next(){
+// ===== FLOW =====
+btn.addEventListener("click",()=>{
   if(resting) return;
   i++;
   if(i>0) rest();
   render();
-}
+});
 
 // RESET SESSION
-function resetSession(){
+resetBtn.addEventListener("click", ()=>{
   i=-1;
   render();
-}
+});
 
-// CALENDAR
+// ===== CALENDAR LOGIC =====
 function markDay(){
   let date=new Date().toISOString().split("T")[0];
   completedDays[date]=(completedDays[date]||0)+1;
   localStorage.completedDays=JSON.stringify(completedDays);
 }
 
+// ===== RENDER CALENDAR =====
 function renderCalendar(){
-  const cal=document.getElementById("calendar");
-  cal.innerHTML="";
-
+  calendar.innerHTML="";
   let now=new Date();
   let year=now.getFullYear();
   let month=now.getMonth();
   let days=new Date(year,month+1,0).getDate();
 
-  for(let d=1;d<=days;d++){
+  for(let d=1; d<=days; d++){
     let dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    
+
     let div=document.createElement("div");
     div.classList.add("day");
 
@@ -279,15 +294,16 @@ function renderCalendar(){
       div.innerText=d;
     }
 
-    cal.appendChild(div);
+    calendar.appendChild(div);
   }
 }
 
-// INIT
+// ===== INIT =====
 updateStats();
 render();
 renderCalendar();
-</script>
 
+});
+</script>
 </body>
 </html>

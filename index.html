@@ -3,35 +3,135 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RepQuest</title>
+<title>RepQuest - Glass UI</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
-body{margin:0;font-family:'Poppins',sans-serif;background:linear-gradient(180deg,#0f172a,#020617);color:white;}
-.container{max-width:500px;margin:auto;padding:15px;}
-.top{font-size:0.9rem;display:flex;justify-content:space-between;margin-bottom:10px;}
-#calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:15px;}
-.day{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;background:#1e293b;}
+body{
+  margin:0;
+  font-family:'Poppins',sans-serif;
+  background:linear-gradient(180deg,#0f172a,#020617);
+  color:white;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container{
+  max-width:500px;
+  margin:auto;
+  padding:15px;
+}
+
+/* HEADER */
+.top{
+  font-size:0.9rem;
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.05);
+  border-radius: 20px;
+  padding:10px 15px;
+}
+
+/* CALENDAR */
+#calendar{
+  display:grid;
+  grid-template-columns: repeat(7,1fr);
+  gap:5px;
+  margin-bottom:15px;
+}
+
+.day{
+  aspect-ratio:1;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:0.7rem;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(8px);
+  border:1px solid rgba(255,255,255,0.1);
+  transition: all 0.3s ease;
+}
+.day:hover{
+  transform: scale(1.05);
+}
 .done{background:#22c55e;color:black;}
 .multi{background:#a855f7;color:white;font-weight:600;}
-.card{background:rgba(255,255,255,0.05);border-radius:25px;padding:25px;text-align:center;margin-bottom:20px;}
-.circle{width:150px;height:150px;border-radius:50%;background:conic-gradient(#22c55e 0deg,#1e293b 0deg);margin:0 auto 15px;display:flex;align-items:center;justify-content:center;}
-.inner{width:120px;height:120px;border-radius:50%;background:#020617;display:flex;align-items:center;justify-content:center;font-size:1.2rem;}
+
+/* WORKOUT CARD */
+.card{
+  background: rgba(255,255,255,0.05);
+  border-radius:25px;
+  padding:25px;
+  text-align:center;
+  margin-bottom:20px;
+  backdrop-filter: blur(15px);
+  border:1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.37);
+}
+
+/* CIRCLE */
+.circle{
+  width:150px;
+  height:150px;
+  border-radius:50%;
+  background:conic-gradient(#22c55e 0deg,#1e293b 0deg);
+  margin:0 auto 15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.inner{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  background: rgba(255,255,255,0.05);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.2rem;
+  backdrop-filter: blur(15px);
+  border:1px solid rgba(255,255,255,0.1);
+}
+
+/* TEXT */
 .exercise{font-size:1.5rem;font-weight:600;}
 .reps{opacity:0.7;}
 .setinfo{opacity:0.6;font-size:0.9rem;margin-top:5px;}
 .timer{font-size:2rem;margin-top:10px;}
-button{margin-top:15px;width:100%;padding:15px;border:none;border-radius:20px;background:#22c55e;font-weight:600;}
-.secondary{background:#334155;color:white;}
+
+/* BUTTONS */
+button{
+  margin-top:15px;
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:20px;
+  background:#22c55e;
+  font-weight:600;
+  cursor:pointer;
+  transition: all 0.3s ease;
+}
+button:hover{transform:scale(1.05);}
+.secondary{
+  background:#334155;
+  color:white;
+}
+.secondary:hover{transform:scale(1.05);}
 </style>
 </head>
 <body>
 <div class="container">
+
 <div class="top">
 <div>XP: <span id="xp">0</span></div>
 <div>Lvl: <span id="level">1</span></div>
 <div>Streak: <span id="streak">0</span></div>
 </div>
+
 <div id="calendar"></div>
+
 <div class="card">
 <div class="circle" id="circle"><div class="inner" id="percent">0%</div></div>
 <div class="exercise" id="exercise">Ready?</div>
@@ -41,11 +141,11 @@ button{margin-top:15px;width:100%;padding:15px;border:none;border-radius:20px;ba
 <button id="btn">Start Workout</button>
 <button class="secondary" id="resetBtn">Reset Session</button>
 </div>
+
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", ()=>{
-// ELEMENTS
 const exercise = document.getElementById("exercise");
 const reps = document.getElementById("reps");
 const setinfo = document.getElementById("setinfo");
@@ -59,7 +159,6 @@ const xpSpan = document.getElementById("xp");
 const level = document.getElementById("level");
 const streakSpan = document.getElementById("streak");
 
-// WORKOUT
 const workout=[
 ["Push-ups",10],
 ["Wide Push-ups",10],
@@ -74,16 +173,14 @@ const workout=[
 
 let i=-1,resting=false,timerInt;
 
-// STORAGE LOAD
 let xp=+localStorage.getItem('xp')||0;
 let streak=+localStorage.getItem('streak')||0;
-let last=localStorage.getItem('last')||"";
 let completedDays=JSON.parse(localStorage.getItem('completedDays')||"{}");
 
-// UPDATE STATS
+// Update Stats
 function updateStats(){xpSpan.innerText=xp;level.innerText=Math.floor(xp/100)+1;streakSpan.innerText=streak;}
 
-// UPDATE CIRCLE
+// Update Circle
 function updateCircle(){
   let percentVal=Math.max(0,(i+1)/workout.length);
   let deg=percentVal*360;
@@ -91,7 +188,7 @@ function updateCircle(){
   percent.innerText=Math.round(percentVal*100)+"%";
 }
 
-// RENDER WORKOUT
+// Render workout
 function render(){
   if(i<0){exercise.innerText="Ready?";reps.innerText="";setinfo.innerText="";updateCircle();return;}
   if(i>=workout.length){
@@ -106,39 +203,32 @@ function render(){
   updateCircle();
 }
 
-// REST
-function rest(){
-  let t=45;resting=true;btn.disabled=true;
-  timerInt=setInterval(()=>{
-    timer.innerText=t+"s";t--;
-    if(t<0){clearInterval(timerInt);timer.innerText="";resting=false;btn.disabled=false;}
-  },1000);
-}
+// Rest
+function rest(){let t=45;resting=true;btn.disabled=true;
+timerInt=setInterval(()=>{timer.innerText=t+"s";t--;if(t<0){clearInterval(timerInt);timer.innerText="";resting=false;btn.disabled=false;}},1000);}
 
-// FLOW
+// Button flow
 btn.addEventListener("click",()=>{
   if(resting) return;
   i++;if(i>0) rest();
   render();
 });
 
-// RESET SESSION
+// Reset
 resetBtn.addEventListener("click", ()=>{
   i=-1;render();
 });
 
-// MARK DAY AND UPDATE STORAGE
+// Calendar & Progress
 function markDay(){
   let date=new Date().toISOString().split("T")[0];
   completedDays[date]=(completedDays[date]||0)+1;
   localStorage.setItem('completedDays',JSON.stringify(completedDays));
-  streak = updateStreak();
-  localStorage.setItem('streak',streak);
+  streak=updateStreak();localStorage.setItem('streak',streak);
 }
 
-// UPDATE STREAK
 function updateStreak(){
-  let dates = Object.keys(completedDays).sort();
+  let dates=Object.keys(completedDays).sort();
   if(dates.length===0) return 0;
   let streakCount=0;
   let today=new Date();
@@ -150,18 +240,17 @@ function updateStreak(){
   return streakCount;
 }
 
-// RENDER CALENDAR
+// Render Calendar
 function renderCalendar(){
   calendar.innerHTML="";
   let now=new Date();
   let year=now.getFullYear();
   let month=now.getMonth();
   let days=new Date(year,month+1,0).getDate();
-  for(let d=1; d<=days; d++){
+  for(let d=1;d<=days;d++){
     let dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     let div=document.createElement("div");
-    div.classList.add("day");
-    div.innerText=d;
+    div.classList.add("day");div.innerText=d;
     if(completedDays[dateStr]){
       if(completedDays[dateStr]===1){div.classList.add("done");div.innerText="1";}
       else{div.classList.add("multi");div.innerText=completedDays[dateStr];}

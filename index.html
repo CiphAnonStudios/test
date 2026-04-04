@@ -10,27 +10,44 @@
 body{
   margin:0;
   font-family:'Poppins',sans-serif;
-  background:linear-gradient(180deg,#0f172a,#020617);
+  background:radial-gradient(circle at top,#0f172a,#020617);
   color:white;
 }
 
 .container{max-width:500px;margin:auto;padding:15px;}
 
+/* GLASS */
+.glass{
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,0.1);
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  border-radius:20px;
+}
+
+/* HEADER */
 .top{
   display:flex;
   justify-content:space-between;
+  padding:12px;
   margin-bottom:10px;
-  padding:10px;
-  border-radius:15px;
-  background:rgba(255,255,255,0.05);
-  backdrop-filter:blur(10px);
-  font-size:0.9rem;
 }
 
+/* NAV */
+.nav{
+  display:flex;
+  gap:10px;
+  margin-bottom:10px;
+}
+.nav button{
+  flex:1;
+}
+
+/* CALENDAR */
 #calendar{
   display:grid;
   grid-template-columns: repeat(7,1fr);
-  gap:5px;
+  gap:6px;
   margin-bottom:15px;
 }
 
@@ -42,49 +59,51 @@ body{
 
 .day{
   aspect-ratio:1;
-  border-radius:10px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:0.7rem;
-  background:rgba(255,255,255,0.05);
-  backdrop-filter:blur(10px);
-  border:1px solid rgba(255,255,255,0.1);
+  border-radius:10px;
+  font-size:0.75rem;
+  transition:0.25s;
 }
+.day:hover{transform:scale(1.08);}
 
 .today{border:2px solid #22c55e;}
 .done{background:#22c55e;color:black;}
 .multi{background:#a855f7;color:white;font-weight:600;}
 
-.card{
-  background:rgba(255,255,255,0.05);
-  border-radius:25px;
-  padding:20px;
-  text-align:center;
-  backdrop-filter:blur(15px);
-}
+/* CARD */
+.card{padding:20px;text-align:center;}
 
+/* CIRCLE */
 .circle{
-  width:150px;
-  height:150px;
+  width:160px;
+  height:160px;
   border-radius:50%;
-  background:conic-gradient(#22c55e 0deg,#1e293b 0deg);
   margin:auto;
   display:flex;
   align-items:center;
   justify-content:center;
+  transition:background 0.6s ease; /* smoother */
 }
 
 .inner{
   width:120px;
   height:120px;
   border-radius:50%;
-  background:#020617;
   display:flex;
   align-items:center;
   justify-content:center;
+  font-size:1.2rem;
 }
 
+/* TEXT */
+.exercise{font-size:1.4rem;font-weight:600;margin-top:10px;}
+.reps{opacity:0.7;}
+.setinfo{opacity:0.6;font-size:0.8rem;}
+.timer{font-size:2rem;margin-top:10px;}
+
+/* BUTTONS */
 button{
   margin-top:10px;
   width:100%;
@@ -92,32 +111,57 @@ button{
   border:none;
   border-radius:15px;
   background:#22c55e;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.25s;
 }
+button:hover{transform:scale(1.05);}
 .secondary{background:#334155;color:white;}
+
+/* SCREENS */
+.screen{display:none;}
+.active{display:block;}
+
+/* FLAME */
+.flame{
+  animation:flame 1s infinite alternate;
+}
+@keyframes flame{
+  from{transform:scale(1);}
+  to{transform:scale(1.2);}
+}
 </style>
 </head>
 
 <body>
 <div class="container">
 
-<div class="top">
+<div class="top glass">
 <div>XP: <span id="xp">0</span></div>
 <div>Lvl: <span id="level">1</span></div>
-<div>Streak: <span id="streak">0</span></div>
+<div>🔥 <span id="streak" class="flame">0</span></div>
 </div>
+
+<div class="nav">
+<button onclick="showScreen('main')">Workout</button>
+<button onclick="showScreen('profile')">Profile</button>
+</div>
+
+<!-- MAIN -->
+<div id="main" class="screen active">
 
 <div id="month"></div>
 <div id="calendar"></div>
 
-<div class="card">
+<div class="card glass">
 <div class="circle" id="circle">
-<div class="inner" id="percent">0/100</div>
+<div class="inner glass" id="percent">0/100</div>
 </div>
 
-<div id="exercise">Ready?</div>
-<div id="reps"></div>
-<div id="setinfo"></div>
-<div id="timer"></div>
+<div class="exercise" id="exercise">Ready?</div>
+<div class="reps" id="reps"></div>
+<div class="setinfo" id="setinfo"></div>
+<div class="timer" id="timer"></div>
 
 <button id="btn">Start</button>
 <button class="secondary" id="resetBtn">Reset</button>
@@ -125,16 +169,23 @@ button{
 
 </div>
 
+<!-- PROFILE -->
+<div id="profile" class="screen glass card">
+<h2>Your Profile</h2>
+<p>Total XP: <span id="p_xp"></span></p>
+<p>Level: <span id="p_level"></span></p>
+<p>Workout Days: <span id="p_days"></span></p>
+<p>Best Streak: <span id="p_streak"></span></p>
+</div>
+
+</div>
+
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
 
-// ✅ LOCAL DATE FIX (IMPORTANT)
 function getLocalDate(){
-  let d = new Date();
-  let year = d.getFullYear();
-  let month = String(d.getMonth()+1).padStart(2,'0');
-  let day = String(d.getDate()).padStart(2,'0');
-  return `${year}-${month}-${day}`;
+  let d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
 const workout=[
@@ -150,7 +201,7 @@ const workout=[
 ["Slow Push-ups",10]
 ];
 
-let i=-1,totalReps=0,resting=false,timerInt;
+let i=-1,totalReps=0;
 
 let xp=+localStorage.getItem("xp")||0;
 let completedDays=JSON.parse(localStorage.getItem("completedDays")||"{}");
@@ -162,18 +213,36 @@ const streakEl=document.getElementById("streak");
 const exercise=document.getElementById("exercise");
 const reps=document.getElementById("reps");
 const setinfo=document.getElementById("setinfo");
-const timer=document.getElementById("timer");
-const btn=document.getElementById("btn");
-const resetBtn=document.getElementById("resetBtn");
 const percent=document.getElementById("percent");
 const circle=document.getElementById("circle");
 const calendar=document.getElementById("calendar");
+
+// PROFILE UI
+const p_xp=document.getElementById("p_xp");
+const p_level=document.getElementById("p_level");
+const p_days=document.getElementById("p_days");
+const p_streak=document.getElementById("p_streak");
+
+// NAV
+window.showScreen=(id)=>{
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  updateProfile();
+};
 
 // STATS
 function updateStats(){
   xpEl.innerText=xp;
   levelEl.innerText=Math.floor(xp/100)+1;
   streakEl.innerText=Object.keys(completedDays).length;
+}
+
+// PROFILE UPDATE
+function updateProfile(){
+  p_xp.innerText=xp;
+  p_level.innerText=Math.floor(xp/100)+1;
+  p_days.innerText=Object.keys(completedDays).length;
+  p_streak.innerText=Object.keys(completedDays).length;
 }
 
 // CIRCLE
@@ -185,74 +254,43 @@ function updateCircle(){
 
 // RENDER
 function render(){
-  if(i<0){
-    exercise.innerText="Ready?";
-    reps.innerText="";
-    setinfo.innerText="";
-    updateCircle();
-    return;
-  }
-
   if(i>=workout.length){
-    exercise.innerText="Complete";
-    btn.disabled=true;
-
-    xp+=50;
-    localStorage.setItem("xp",xp);
-
-    let today=getLocalDate(); // ✅ FIXED
+    let today=getLocalDate();
     completedDays[today]=(completedDays[today]||0)+1;
     localStorage.setItem("completedDays",JSON.stringify(completedDays));
-
+    xp+=50;
+    localStorage.setItem("xp",xp);
     renderCalendar();
     updateStats();
+    exercise.innerText="Complete";
     return;
   }
 
-  exercise.innerText=workout[i][0];
-  reps.innerText=workout[i][1]+" reps";
-  setinfo.innerText=`Set ${i+1}/10`;
+  if(i>=0){
+    exercise.innerText=workout[i][0];
+    reps.innerText=workout[i][1]+" reps";
+    setinfo.innerText=`Set ${i+1}/10`;
+  }
+
   updateCircle();
 }
 
-// REST
-function rest(){
-  let t=45;
-  resting=true;
-  btn.disabled=true;
-
-  timerInt=setInterval(()=>{
-    timer.innerText=t+"s";
-    t--;
-    if(t<0){
-      clearInterval(timerInt);
-      timer.innerText="";
-      resting=false;
-      btn.disabled=false;
-    }
-  },1000);
-}
-
 // FLOW
-btn.onclick=()=>{
-  if(resting) return;
+document.getElementById("btn").onclick=()=>{
   i++;
-  if(i>0) totalReps+=workout[i-1][1];
-  rest();
+  if(i>0) totalReps+=10;
   render();
 };
 
-resetBtn.onclick=()=>{
+document.getElementById("resetBtn").onclick=()=>{
   i=-1;
   totalReps=0;
-  btn.disabled=false;
   render();
 };
 
 // CALENDAR
 function renderCalendar(){
   calendar.innerHTML="";
-
   let now=new Date();
   let year=now.getFullYear();
   let month=now.getMonth();
@@ -263,33 +301,26 @@ function renderCalendar(){
   let firstDay=new Date(year,month,1).getDay();
   let days=new Date(year,month+1,0).getDate();
 
-  let names=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  names.forEach(n=>{
+  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(n=>{
     let el=document.createElement("div");
     el.className="day-name";
     el.innerText=n;
     calendar.appendChild(el);
   });
 
-  for(let i=0;i<firstDay;i++){
-    calendar.appendChild(document.createElement("div"));
-  }
+  for(let i=0;i<firstDay;i++) calendar.appendChild(document.createElement("div"));
 
-  let todayStr=getLocalDate(); // ✅ FIXED
+  let todayStr=getLocalDate();
 
   for(let d=1;d<=days;d++){
     let dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     let div=document.createElement("div");
-    div.className="day";
+    div.className="day glass";
 
     if(dateStr===todayStr) div.classList.add("today");
 
     if(completedDays[dateStr]){
-      if(completedDays[dateStr]>1){
-        div.classList.add("multi"); // purple
-      } else {
-        div.classList.add("done"); // green
-      }
+      div.classList.add(completedDays[dateStr]>1?"multi":"done");
       div.innerText=completedDays[dateStr];
     } else {
       div.innerText=d;

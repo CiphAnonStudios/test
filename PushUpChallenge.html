@@ -166,7 +166,7 @@ button:hover{transform:scale(1.05);}
 <button id="btn">Start</button>
 <button class="secondary" id="resetBtn">Reset</button>
 </div>
-
+<button class="secondary" id="resetProgressBtn">Reset Progress</button>
 </div>
 
 <!-- PROFILE -->
@@ -336,6 +336,27 @@ render();
 renderCalendar();
 
 });
+// RESET LOCAL STORAGE WITH WARNING
+document.getElementById("resetProgressBtn").onclick = () => {
+  // Show confirmation popup
+  if (confirm("Are you sure you want to reset all progress?")) {
+    // Clear saved data
+    localStorage.removeItem("xp");
+    localStorage.removeItem("completedDays");
+    
+    // Reset variables
+    xp = 0;
+    totalReps = 0;
+    i = -1;
+    completedDays = {};
+
+    // Update UI
+    updateStats();
+    updateProfile();
+    render();
+    renderCalendar();
+  }
+};
 </script>
 
 </body>

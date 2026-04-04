@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RepQuest</title>
+  <style>
+    :root {
+      --navy: #0B1F3F;
+      --green: #00FF7F;
+      --white: #FFFFFF;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background-color: var(--navy);
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .logo-container img {
+      width: 60px;
+      height: 60px;
+    }
+
+    .logo-name {
+      font-size: 36px;
+      font-weight: bold;
+      color: var(--green);
+    }
+
+    .description {
+      font-size: 18px;
+      color: var(--white);
+      margin-bottom: 30px;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 15px 30px;
+      margin-top: 20px;
+      background-color: var(--green);
+      color: var(--navy);
+      font-weight: bold;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 10px var(--green);
+    }
+
+    section {
+      background-color: rgba(255, 255, 255, 0.05);
+      margin: 20px;
+      padding: 20px;
+      border-radius: 12px;
+    }
+
+    section h2 {
+      color: var(--green);
+      margin-top: 0;
+    }
+
+    section p {
+      color: var(--white);
+      line-height: 1.5;
+    }
+
+    .socials a {
+      display: inline-block;
+      margin: 5px 10px 5px 0;
+      color: var(--green);
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .socials a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      margin-top: auto;
+      padding: 20px;
+      text-align: center;
+      background-color: rgba(0, 0, 0, 0.2);
+      font-size: 14px;
+    }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-container">
+      <img src="RepQuestLogo.png" alt="RepQuest Logo">
+      <div class="logo-name">RepQuest</div>
+    </div>
+    <div class="description">Track your push-ups, crush challenges, and get stronger every day!</div>
+    <a href="PushUpChallenge.html" class="button">Go to Push-Up Challenge</a>
+  </header>
+
+  <section>
+    <h2>What is RepQuest?</h2>
+    <p>RepQuest is a simple project I have been working on for myself to improve and keep track of my push-ups.</p>
+  </section>
+
+  <section>
+    <h2>About Me</h2>
+    <p>Hi, I'm Theo, a 17-year-old boy who made RepQuest because I was bored and wanted to work on my coding skills.</p>
+  </section>
+
+  <section>
+    <h2>Socials</h2>
+    <div class="socials">
+      <a href="https://www.youtube.com/@ItsToonyTime" target="_blank">YouTube - @ItsToonyTime</a><br>
+      <a href="https://www.snapchat.com/add/t49474294" target="_blank">Snapchat - @t49474294</a><br>
+      <a href="https://www.tiktok.com/@delivered_4_her" target="_blank">TikTok - @delivered_4_her</a>
+    </div>
+  </section>
+
+  <footer>
+    &copy; 2026 RepQuest. All rights reserved.
+  </footer>
+
+</body>
+</html>

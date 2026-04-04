@@ -31,7 +31,6 @@ body{
 .calendar-header{
   display:flex;
   justify-content:space-between;
-  align-items:center;
   margin-bottom:5px;
 }
 
@@ -57,12 +56,12 @@ body{
   background:rgba(255,255,255,0.05);
   backdrop-filter:blur(10px);
   border:1px solid rgba(255,255,255,0.1);
+  transition:0.2s;
 }
 
-.today{
-  border:2px solid #22c55e;
-}
+.day:hover{transform:scale(1.05);}
 
+.today{border:2px solid #22c55e;}
 .done{background:#22c55e;color:black;}
 .multi{background:#a855f7;color:white;font-weight:600;}
 
@@ -115,6 +114,7 @@ button{
   border-radius:15px;
   background:#22c55e;
   font-weight:600;
+  cursor:pointer;
 }
 
 .secondary{background:#334155;color:white;}
@@ -125,21 +125,19 @@ button{
 <div class="container">
 
 <div class="top">
-<div>XP: <span id="xp"></span></div>
-<div>Lvl: <span id="level"></span></div>
-<div>Streak: <span id="streak"></span></div>
+<div>XP: <span id="xp">0</span></div>
+<div>Lvl: <span id="level">1</span></div>
+<div>Streak: <span id="streak">0</span></div>
 </div>
 
 <!-- CALENDAR -->
 <div class="calendar-header">
 <div id="month"></div>
 </div>
-
 <div id="calendar"></div>
 
 <!-- WORKOUT -->
 <div class="card">
-
 <div class="circle" id="circle">
 <div class="inner" id="percent">0/100</div>
 </div>
@@ -152,7 +150,6 @@ button{
 
 <button id="btn">Start</button>
 <button class="secondary" id="resetBtn">Reset</button>
-
 </div>
 
 </div>
@@ -176,10 +173,14 @@ const workout=[
 let i=-1,totalReps=0,resting=false,timerInt;
 
 // STORAGE
-let xp=+localStorage.xp||0;
-let completedDays=JSON.parse(localStorage.completedDays||"{}");
+let xp=+localStorage.getItem("xp")||0;
+let completedDays=JSON.parse(localStorage.getItem("completedDays")||"{}");
 
 // UI
+const xpEl=document.getElementById("xp");
+const levelEl=document.getElementById("level");
+const streakEl=document.getElementById("streak");
+
 const exercise=document.getElementById("exercise");
 const reps=document.getElementById("reps");
 const setinfo=document.getElementById("setinfo");
@@ -193,8 +194,8 @@ const calendar=document.getElementById("calendar");
 // STATS
 function updateStats(){
 xpEl.innerText=xp;
-level.innerText=Math.floor(xp/100)+1;
-streak.innerText=Object.keys(completedDays).length;
+levelEl.innerText=Math.floor(xp/100)+1;
+streakEl.innerText=Object.keys(completedDays).length;
 }
 
 // CIRCLE
@@ -217,12 +218,13 @@ return;
 if(i>=workout.length){
 exercise.innerText="Complete";
 btn.disabled=true;
+
 xp+=50;
-localStorage.xp=xp;
+localStorage.setItem("xp",xp);
 
 let today=new Date().toISOString().split("T")[0];
 completedDays[today]=(completedDays[today]||0)+1;
-localStorage.completedDays=JSON.stringify(completedDays);
+localStorage.setItem("completedDays",JSON.stringify(completedDays));
 
 renderCalendar();
 updateStats();
@@ -264,6 +266,7 @@ rest();
 render();
 };
 
+// RESET
 resetBtn.onclick=()=>{
 i=-1;
 totalReps=0;
@@ -285,21 +288,18 @@ now.toLocaleString("default",{month:"long"})+" "+year;
 let firstDay=new Date(year,month,1).getDay();
 let days=new Date(year,month+1,0).getDate();
 
-let dayNames=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-dayNames.forEach(d=>{
+let names=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+names.forEach(n=>{
 let el=document.createElement("div");
 el.className="day-name";
-el.innerText=d;
+el.innerText=n;
 calendar.appendChild(el);
 });
 
-// empty slots
 for(let i=0;i<firstDay;i++){
-let empty=document.createElement("div");
-calendar.appendChild(empty);
+calendar.appendChild(document.createElement("div"));
 }
 
-// days
 for(let d=1;d<=days;d++){
 let dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
 

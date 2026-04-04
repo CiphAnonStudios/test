@@ -257,9 +257,9 @@ function render(){
     xp+=50;
     localStorage.setItem("xp",xp);
 
-    // **Update today's count correctly**
-    let today=new Date().toISOString().split("T")[0];
-    completedDays[today]=(completedDays[today]||0)+1;
+    // Update today correctly
+    let todayStr=new Date().toISOString().split("T")[0];
+    completedDays[todayStr]=(completedDays[todayStr]||0)+1;
     localStorage.setItem("completedDays",JSON.stringify(completedDays));
 
     renderCalendar();
@@ -360,6 +360,8 @@ function renderCalendar(){
     calendar.appendChild(document.createElement("div"));
   }
 
+  let todayStr=new Date().toISOString().split("T")[0];
+
   for(let d=1;d<=days;d++){
     let dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     let div=document.createElement("div");
@@ -369,14 +371,27 @@ function renderCalendar(){
     if(d===today.getDate()) div.classList.add("today");
 
     if(completedDays[dateStr]){
-      if(completedDays[dateStr]===1){
-        div.classList.add("done");
-        div.innerText="1";
-      }else{
-        div.classList.add("multi");
-        div.innerText=completedDays[dateStr];
+      if(dateStr===todayStr){
+        // Today with multiple sets = purple
+        if(completedDays[dateStr]>1){
+          div.classList.add("multi");
+          div.innerText=completedDays[dateStr];
+        } else {
+          div.classList.add("done");
+          div.innerText=completedDays[dateStr];
+        }
+      } else {
+        // Past days
+        if(completedDays[dateStr]>1){
+          div.classList.add("multi");
+          div.innerText=completedDays[dateStr];
+        } else {
+          div.classList.add("done");
+          div.innerText=completedDays[dateStr];
+        }
       }
-    }else{
+    } else {
+      // No workout yet
       div.innerText=d;
     }
 

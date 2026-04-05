@@ -137,6 +137,31 @@ button:hover{transform:scale(1.05);}
   from{transform:scale(1);}
   to{transform:scale(1.2);}
 }
+
+/* BADGES */
+.badge {
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:0.7rem;
+  text-align:center;
+  padding:5px;
+  background:rgba(255,255,255,0.1);
+  border:1px solid rgba(255,255,255,0.2);
+  transition:0.3s;
+}
+.badge.unlocked {
+  background: gold;
+  color:black;
+  font-weight:600;
+  border-color:#ffd700;
+}
+.badge.locked {
+  opacity:0.3;
+}
 </style>
 </head>
 
@@ -170,9 +195,23 @@ button:hover{transform:scale(1.05);}
 <div class="setinfo" id="setinfo"></div>
 <div class="timer" id="timer"></div>
 
+<!-- Push-up goal selector -->
+<label for="pushupGoal">Choose your push-up goal:</label>
+<select id="pushupGoal">
+  <option value="10">10</option>
+  <option value="30">30</option>
+  <option value="50" selected>50</option>
+  <option value="70">70</option>
+  <option value="100">100</option>
+  <option value="200">200</option>
+  <option value="300">300</option>
+  <option value="500">500</option>
+</select>
+
 <button id="btn">Start</button>
 <button class="secondary" id="resetBtn">Reset</button>
 </div>
+
 <button class="secondary" id="resetProgressBtn">Reset Progress</button>
 </div>
 
@@ -183,6 +222,9 @@ button:hover{transform:scale(1.05);}
 <p>Level: <span id="p_level"></span></p>
 <p>Workout Days: <span id="p_days"></span></p>
 <p>Best Streak: <span id="p_streak"></span></p>
+
+<h3>Achievements</h3>
+<div id="badges" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
 </div>
 
 </div>
@@ -194,6 +236,25 @@ function getLocalDate(){
   let d=new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
+
+// PUSH-UP TIERS
+const pushupTiers = {
+  10: {color:"#90ee90", xp:5},       // Light Green
+  30: {color:"#00ff00", xp:15},      // Green
+  50: {color:"#3b82f6", xp:25},      // Blue
+  70: {color:"#a855f7", xp:40},      // Purple
+  100: {color:"#ffd700", xp:60},     // Gold
+  200: {color:"#ffa500", xp:120},    // Orange
+  300: {color:"#ff0000", xp:180},    // Red
+  500: {color:"#8b0000", xp:300}     // Dark Red
+};
+
+let selectedPushups = 50; // default
+const pushupGoalSelect = document.getElementById("pushupGoal");
+pushupGoalSelect.addEventListener("change",(e)=>{
+  selectedPushups = parseInt(e.target.value);
+  updateCircle();
+});
 
 const workout=[
 ["Normal Push-ups",10],
@@ -230,6 +291,33 @@ const p_level=document.getElementById("p_level");
 const p_days=document.getElementById("p_days");
 const p_streak=document.getElementById("p_streak");
 
+// BADGES
+const badgesEl = document.getElementById("badges");
+const badgeList = [
+  {name:"First 50 XP", check:()=>xp>=50},
+  {name:"100 XP Milestone", check:()=>xp>=100},
+  {name:"5-Day Streak", check:()=>Object.keys(completedDays).length>=5},
+  {name:"10-Day Streak", check:()=>Object.keys(completedDays).length>=10},
+  {name:"Workout Beginner", check:()=>totalReps>=50},
+  {name:"Workout Pro", check:()=>totalReps>=200},
+  {name:"10 Push-Ups Done", check:()=>xp>=pushupTiers[10].xp},
+  {name:"50 Push-Ups Done", check:()=>xp>=pushupTiers[50].xp},
+  {name:"100 Push-Ups Done", check:()=>xp>=pushupTiers[100].xp},
+  {name:"200 Push-Ups Done", check:()=>xp>=pushupTiers[200].xp},
+  {name:"300 Push-Ups Done", check:()=>xp>=pushupTiers[300].xp},
+  {name:"500 Push-Ups Done", check:()=>xp>=pushupTiers[500].xp}
+];
+
+function updateBadges(){
+  badgesEl.innerHTML="";
+  badgeList.forEach(b=>{
+    const div=document.createElement("div");
+    div.className="badge "+(b.check()?"unlocked":"locked");
+    div.innerText=b.name;
+    badgesEl.appendChild(div);
+  });
+}
+
 // NAV
 window.showScreen=(id)=>{
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
@@ -250,13 +338,15 @@ function updateProfile(){
   p_level.innerText=Math.floor(xp/100)+1;
   p_days.innerText=Object.keys(completedDays).length;
   p_streak.innerText=Object.keys(completedDays).length;
+  updateBadges();
 }
 
 // CIRCLE
 function updateCircle(){
-  let p=totalReps/100;
-  circle.style.background=`conic-gradient(#22c55e ${p*360}deg,#1e293b ${p*360}deg)`;
-  percent.innerText=totalReps+"/100";
+  let p = totalReps / selectedPushups;
+  if(p>1) p=1;
+  circle.style.background=`conic-gradient(${pushupTiers[selectedPushups].color} ${p*360}deg,#1e293b ${p*360}deg)`;
+  percent.innerText=totalReps+"/"+selectedPushups;
 }
 
 // RENDER
@@ -265,11 +355,13 @@ function render(){
     let today=getLocalDate();
     completedDays[today]=(completedDays[today]||0)+1;
     localStorage.setItem("completedDays",JSON.stringify(completedDays));
-    xp+=50;
+    xp += pushupTiers[selectedPushups].xp;  // dynamic XP
     localStorage.setItem("xp",xp);
     renderCalendar();
     updateStats();
     exercise.innerText="Complete";
+    totalReps = 0;
+    i = -1;
     return;
   }
 
@@ -327,8 +419,14 @@ function renderCalendar(){
     if(dateStr===todayStr) div.classList.add("today");
 
     if(completedDays[dateStr]){
-      div.classList.add(completedDays[dateStr]>1?"multi":"done");
-      div.innerText=completedDays[dateStr];
+      let dayReps = completedDays[dateStr]; // reps done
+      // find closest tier
+      let closestTier = Object.keys(pushupTiers).reduce((a,b)=>{
+        return Math.abs(b - dayReps) < Math.abs(a - dayReps) ? b : a;
+      });
+      div.style.background = pushupTiers[closestTier].color;
+      div.style.color = closestTier>=100?"black":"white";
+      div.innerText = dayReps;
     } else {
       div.innerText=d;
     }
@@ -342,22 +440,17 @@ updateStats();
 render();
 renderCalendar();
 
-});
 // RESET LOCAL STORAGE WITH WARNING
 document.getElementById("resetProgressBtn").onclick = () => {
-  // Show confirmation popup
   if (confirm("Are you sure you want to reset all progress?")) {
-    // Clear saved data
     localStorage.removeItem("xp");
     localStorage.removeItem("completedDays");
     
-    // Reset variables
     xp = 0;
     totalReps = 0;
     i = -1;
     completedDays = {};
 
-    // Update UI
     updateStats();
     updateProfile();
     render();

@@ -208,10 +208,10 @@ const workout=[
 ["Slow Push-ups",10]
 ];
 
-let i=-1,totalReps=0;
+let i = 0, totalReps = 0;
 
-let xp=+localStorage.getItem("xp")||0;
-let completedDays=JSON.parse(localStorage.getItem("completedDays")||"{}");
+let xp = +localStorage.getItem("xp") || 0;
+let completedDays = JSON.parse(localStorage.getItem("completedDays") || "{}");
 
 const xpEl=document.getElementById("xp");
 const levelEl=document.getElementById("level");
@@ -254,14 +254,15 @@ function updateProfile(){
 
 // CIRCLE
 function updateCircle(){
-  let p=totalReps/100;
+  if(totalReps > 100) totalReps = 100; // cap at 100
+  let p = totalReps / 100;
   circle.style.background=`conic-gradient(#22c55e ${p*360}deg,#1e293b ${p*360}deg)`;
-  percent.innerText=totalReps+"/100";
+  percent.innerText = totalReps + "/100";
 }
 
 // RENDER
 function render(){
-  if(i>=workout.length){
+  if(i >= workout.length){
     let today=getLocalDate();
     completedDays[today]=(completedDays[today]||0)+1;
     localStorage.setItem("completedDays",JSON.stringify(completedDays));
@@ -270,28 +271,28 @@ function render(){
     renderCalendar();
     updateStats();
     exercise.innerText="Complete";
+    totalReps = 100; // ensure circle is full
+    updateCircle();
     return;
   }
 
-  if(i>=0){
-    exercise.innerText=workout[i][0];
-    reps.innerText=workout[i][1]+" reps";
-    setinfo.innerText=`Set ${i+1}/10`;
-  }
+  exercise.innerText=workout[i][0];
+  reps.innerText=workout[i][1]+" reps";
+  setinfo.innerText=`Set ${i+1}/${workout.length}`;
 
   updateCircle();
 }
 
 // FLOW
-document.getElementById("btn").onclick=()=>{
+document.getElementById("btn").onclick = () => {
+  totalReps += 10;
   i++;
-  if(i>0) totalReps+=10;
   render();
 };
 
-document.getElementById("resetBtn").onclick=()=>{
-  i=-1;
-  totalReps=0;
+document.getElementById("resetBtn").onclick = () => {
+  i = 0;
+  totalReps = 0;
   render();
 };
 
@@ -319,7 +320,7 @@ function renderCalendar(){
 
   let todayStr=getLocalDate();
 
-  for(let d=1;d<=days;d++){
+  for(let d=1; d<=days; d++){
     let dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     let div=document.createElement("div");
     div.className="day glass";
@@ -342,28 +343,24 @@ updateStats();
 render();
 renderCalendar();
 
-});
-// RESET LOCAL STORAGE WITH WARNING
+// RESET LOCAL STORAGE
 document.getElementById("resetProgressBtn").onclick = () => {
-  // Show confirmation popup
-  if (confirm("Are you sure you want to reset all progress?")) {
-    // Clear saved data
+  if(confirm("Are you sure you want to reset all progress?")){
     localStorage.removeItem("xp");
     localStorage.removeItem("completedDays");
-    
-    // Reset variables
+
     xp = 0;
     totalReps = 0;
-    i = -1;
+    i = 0;
     completedDays = {};
 
-    // Update UI
     updateStats();
     updateProfile();
     render();
     renderCalendar();
   }
 };
+});
 </script>
 
 </body>

@@ -1,4 +1,202 @@
- ["Sit-Ups",10],
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RepQuest</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+      --navy: #0B1F3F;
+      --green: #00FF7F;
+      --white: #FFFFFF;
+      --light-navy: #132A5B;
+    }
+  
+body{
+  margin:0;
+  font-family:'Poppins', sans-serif;
+  background: var(--navy);
+  color: white;
+}
+
+.container{max-width:500px;margin:auto;padding:15px;}
+
+/* GLASS */
+.glass{
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,0.1);
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  border-radius:20px;
+}
+
+/* HEADER */
+.top{
+  display: flex;
+  justify-content:space-between;
+  padding:12px;
+  margin-bottom:10px;
+}
+
+/* NAV */
+.nav{
+  display: flex;
+  gap:10px;
+  margin-bottom:10px;
+}
+.nav button{
+  flex:1;
+}
+
+/* CALENDAR */
+#calendar{
+  display: grid;
+  grid-template-columns: repeat(7,1fr);
+  gap:6px;
+  margin-bottom:15px;
+}
+
+.day-name{
+  font-size:0.6rem;
+  opacity:0.6;
+  text-align: center;
+}
+
+.day{
+  aspect-ratio:1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius:10px;
+  font-size:0.75rem;
+  transition:0.25s;
+}
+.day:hover{transform:scale(1.08);}
+
+.today{border:2px solid #22c55e;}
+.done{background:#22c55e;color:black;}
+.multi{background:#a855f7;color:white;font-weight:600;}
+
+/* CARD */
+.card{padding:20px;text-align:center;}
+
+/* CIRCLE */
+.circle{
+  width:160px;
+  height:160px;
+  border-radius:50%;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:background 0.6s ease; /* smoother */
+}
+
+.inner{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.2rem;
+}
+
+/* TEXT */
+.exercise{font-size:1.4rem;font-weight:600;margin-top:10px;}
+.reps{opacity:0.7;}
+.setinfo{opacity:0.6;font-size:0.8rem;}
+.timer{font-size:2rem;margin-top:10px;}
+
+/* BUTTONS */
+button{
+  margin-top:10px;
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:15px;
+  background:#22c55e;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.25s;
+}
+button:hover{transform:scale(1.05);}
+.secondary{background:#334155;color:white;}
+
+/* SCREENS */
+.screen{display:none;}
+.active{display:block;}
+
+/* FLAME */
+.flame{
+  animation:flame 1s infinite alternate;
+}
+@keyframes flame{
+  from{transform:scale(1);}
+  to{transform:scale(1.2);}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<div class="top glass">
+<div>XP: <span id="xp">0</span></div>
+<div>Lvl: <span id="level">1</span></div>
+<div><svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#FFFFFF"><path d="M240-400q0 52 21 98.5t60 81.5q-1-5-1-9v-9q0-32 12-60t35-51l113-111 113 111q23 23 35 51t12 60v9q0 4-1 9 39-35 60-81.5t21-98.5q0-50-18.5-94.5T648-574q-20 13-42 19.5t-45 6.5q-62 0-107.5-41T401-690q-39 33-69 68.5t-50.5 72Q261-513 250.5-475T240-400Zm240 52-57 56q-11 11-17 25t-6 29q0 32 23.5 55t56.5 23q33 0 56.5-23t23.5-55q0-16-6-29.5T537-292l-57-56Zm0-492v132q0 34 23.5 57t57.5 23q18 0 33.5-7.5T622-658l18-22q74 42 117 117t43 163q0 134-93 227T480-80q-134 0-227-93t-93-227q0-129 86.5-245T480-840Z"/></svg>:<span id="streak" class="flame">0</span></div>
+</div>
+
+<div class="nav">
+<button onclick="showScreen('main')">Workout</button>
+<button onclick="showScreen('profile')">Profile</button>
+</div>
+
+<!-- MAIN -->
+<div id="main" class="screen active">
+
+<div id="month"></div>
+<div id="calendar"></div>
+
+<div class="card glass">
+<div class="circle" id="circle">
+<div class="inner glass" id="percent">0/100</div>
+</div>
+
+<div class="exercise" id="exercise">Ready?</div>
+<div class="reps" id="reps"></div>
+<div class="setinfo" id="setinfo"></div>
+<div class="timer" id="timer"></div>
+
+<button id="btn">Start</button>
+<button class="secondary" id="resetBtn">Reset</button>
+</div>
+<button class="secondary" id="resetProgressBtn">Reset Progress</button>
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="screen glass card">
+<h2>Your Profile</h2>
+<p>Total XP: <span id="p_xp"></span></p>
+<p>Level: <span id="p_level"></span></p>
+<p>Workout Days: <span id="p_days"></span></p>
+<p>Best Streak: <span id="p_streak"></span></p>
+</div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+
+function getLocalDate(){
+  let d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+const workout=[
+["Sit-Ups",10],
   ["Hollow Hold (10s)",10],
   ["Russian Twists (per side)",10],
   ["Leg Raises",10],
@@ -9,3 +207,162 @@
   ["Side Plank Hip Dips (per side)",10],
   ["Mountain Climbers (per side)",10]
 ];
+
+
+let i = 0, totalReps = 0;
+
+let xp = +localStorage.getItem("xp") || 0;
+let completedDays = JSON.parse(localStorage.getItem("completedDays") || "{}");
+
+const xpEl=document.getElementById("xp");
+const levelEl=document.getElementById("level");
+const streakEl=document.getElementById("streak");
+
+const exercise=document.getElementById("exercise");
+const reps=document.getElementById("reps");
+const setinfo=document.getElementById("setinfo");
+const percent=document.getElementById("percent");
+const circle=document.getElementById("circle");
+const calendar=document.getElementById("calendar");
+
+// PROFILE UI
+const p_xp=document.getElementById("p_xp");
+const p_level=document.getElementById("p_level");
+const p_days=document.getElementById("p_days");
+const p_streak=document.getElementById("p_streak");
+
+// NAV
+window.showScreen=(id)=>{
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  updateProfile();
+};
+
+// STATS
+function updateStats(){
+  xpEl.innerText=xp;
+  levelEl.innerText=Math.floor(xp/100)+1;
+  streakEl.innerText=Object.keys(completedDays).length;
+}
+
+// PROFILE UPDATE
+function updateProfile(){
+  p_xp.innerText=xp;
+  p_level.innerText=Math.floor(xp/100)+1;
+  p_days.innerText=Object.keys(completedDays).length;
+  p_streak.innerText=Object.keys(completedDays).length;
+}
+
+// CIRCLE
+function updateCircle(){
+  if(totalReps > 100) totalReps = 100; // cap at 100
+  let p = totalReps / 100;
+  circle.style.background=`conic-gradient(#22c55e ${p*360}deg,#1e293b ${p*360}deg)`;
+  percent.innerText = totalReps + "/100";
+}
+
+// RENDER
+function render(){
+  if(i >= workout.length){
+    let today=getLocalDate();
+    completedDays[today]=(completedDays[today]||0)+1;
+    localStorage.setItem("completedDays",JSON.stringify(completedDays));
+    xp+=50;
+    localStorage.setItem("xp",xp);
+    renderCalendar();
+    updateStats();
+    exercise.innerText="Complete";
+    totalReps = 100; // ensure circle is full
+    updateCircle();
+    return;
+  }
+
+  exercise.innerText=workout[i][0];
+  reps.innerText=workout[i][1]+" reps";
+  setinfo.innerText=`Set ${i+0}/${workout.length}`;
+
+  updateCircle();
+}
+
+// FLOW
+document.getElementById("btn").onclick = () => {
+  totalReps += 10;
+  i++;
+  render();
+};
+
+document.getElementById("resetBtn").onclick = () => {
+  i = 0;
+  totalReps = 0;
+  render();
+};
+
+// CALENDAR
+function renderCalendar(){
+  calendar.innerHTML="";
+  let now=new Date();
+  let year=now.getFullYear();
+  let month=now.getMonth();
+
+  document.getElementById("month").innerText=
+    now.toLocaleString("default",{month:"long"})+" "+year;
+
+  let firstDay=new Date(year,month,1).getDay();
+  let days=new Date(year,month+1,0).getDate();
+
+  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(n=>{
+    let el=document.createElement("div");
+    el.className="day-name";
+    el.innerText=n;
+    calendar.appendChild(el);
+  });
+
+  for(let i=0;i<firstDay;i++) calendar.appendChild(document.createElement("div"));
+
+  let todayStr=getLocalDate();
+
+  for(let d=1; d<=days; d++){
+    let dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    let div=document.createElement("div");
+    div.className="day glass";
+
+    if(dateStr===todayStr) div.classList.add("today");
+
+    if(completedDays[dateStr]){
+      div.classList.add(completedDays[dateStr]>1?"multi":"done");
+      div.innerText=completedDays[dateStr];
+    } else {
+      div.innerText=d;
+    }
+
+    calendar.appendChild(div);
+  }
+}
+
+// INIT
+updateStats();
+render();
+renderCalendar();
+
+// RESET LOCAL STORAGE
+document.getElementById("resetProgressBtn").onclick = () => {
+  if(confirm("Are you sure you want to reset all progress?")){
+    localStorage.removeItem("xp");
+    localStorage.removeItem("completedDays");
+
+    xp = 0;
+    totalReps = 0;
+    i = 0;
+    completedDays = {};
+
+    updateStats();
+    updateProfile();
+    render();
+    renderCalendar();
+  }
+};
+});
+</script>
+
+</body>
+</html>

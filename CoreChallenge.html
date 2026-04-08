@@ -195,25 +195,27 @@ function getLocalDate(){
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-const workout=[
+// CORE CHALLENGE WORKOUT
+const coreWorkout=[
 ["Sit-Ups",10],
-  ["Hollow Hold (10s)",10],
-  ["Russian Twists (per side)",10],
-  ["Leg Raises",10],
-  ["Plank Shoulder Taps (per side)",10],
-  ["Bicycle Crunches (per side)",10],
-  ["V-Ups",10],
-  ["Flutter Kicks (per side)",10],
-  ["Side Plank Hip Dips (per side)",10],
-  ["Mountain Climbers (per side)",10]
+["Hollow Hold (10s)",10],
+["Russian Twists (per side)",10],
+["Leg Raises",10],
+["Plank Shoulder Taps (per side)",10],
+["Bicycle Crunches (per side)",10],
+["V-Ups",10],
+["Flutter Kicks (per side)",10],
+["Side Plank Hip Dips (per side)",10],
+["Mountain Climbers (per side)",10]
 ];
 
+let coreIndex = 0, coreTotalReps = 0;
 
-let i = 0, totalReps = 0;
+// ✅ CORE CHALLENGE LOCAL STORAGE KEYS
+let coreXP = +localStorage.getItem("core_xp") || 0;
+let coreCompletedDays = JSON.parse(localStorage.getItem("core_completedDays") || "{}");
 
-let xp = +localStorage.getItem("xp") || 0;
-let completedDays = JSON.parse(localStorage.getItem("completedDays") || "{}");
-
+// ELEMENTS
 const xpEl=document.getElementById("xp");
 const levelEl=document.getElementById("level");
 const streakEl=document.getElementById("streak");
@@ -240,60 +242,60 @@ window.showScreen=(id)=>{
 
 // STATS
 function updateStats(){
-  xpEl.innerText=xp;
-  levelEl.innerText=Math.floor(xp/100)+1;
-  streakEl.innerText=Object.keys(completedDays).length;
+  xpEl.innerText=coreXP;
+  levelEl.innerText=Math.floor(coreXP/100)+1;
+  streakEl.innerText=Object.keys(coreCompletedDays).length;
 }
 
 // PROFILE UPDATE
 function updateProfile(){
-  p_xp.innerText=xp;
-  p_level.innerText=Math.floor(xp/100)+1;
-  p_days.innerText=Object.keys(completedDays).length;
-  p_streak.innerText=Object.keys(completedDays).length;
+  p_xp.innerText=coreXP;
+  p_level.innerText=Math.floor(coreXP/100)+1;
+  p_days.innerText=Object.keys(coreCompletedDays).length;
+  p_streak.innerText=Object.keys(coreCompletedDays).length;
 }
 
 // CIRCLE
 function updateCircle(){
-  if(totalReps > 100) totalReps = 100; // cap at 100
-  let p = totalReps / 100;
+  if(coreTotalReps > 100) coreTotalReps = 100; // cap at 100
+  let p = coreTotalReps / 100;
   circle.style.background=`conic-gradient(#22c55e ${p*360}deg,#1e293b ${p*360}deg)`;
-  percent.innerText = totalReps + "/100";
+  percent.innerText = coreTotalReps + "/100";
 }
 
 // RENDER
 function render(){
-  if(i >= workout.length){
+  if(coreIndex >= coreWorkout.length){
     let today=getLocalDate();
-    completedDays[today]=(completedDays[today]||0)+1;
-    localStorage.setItem("completedDays",JSON.stringify(completedDays));
-    xp+=50;
-    localStorage.setItem("xp",xp);
+    coreCompletedDays[today]=(coreCompletedDays[today]||0)+1;
+    localStorage.setItem("core_completedDays",JSON.stringify(coreCompletedDays));
+    coreXP+=50;
+    localStorage.setItem("core_xp",coreXP);
     renderCalendar();
     updateStats();
     exercise.innerText="Complete";
-    totalReps = 100; // ensure circle is full
+    coreTotalReps = 100; // ensure circle is full
     updateCircle();
     return;
   }
 
-  exercise.innerText=workout[i][0];
-  reps.innerText=workout[i][1]+" reps";
-  setinfo.innerText=`Set ${i+0}/${workout.length}`;
+  exercise.innerText=coreWorkout[coreIndex][0];
+  reps.innerText=coreWorkout[coreIndex][1]+" reps";
+  setinfo.innerText=`Set ${coreIndex+1}/${coreWorkout.length}`;
 
   updateCircle();
 }
 
 // FLOW
 document.getElementById("btn").onclick = () => {
-  totalReps += 10;
-  i++;
+  coreTotalReps += 10;
+  coreIndex++;
   render();
 };
 
 document.getElementById("resetBtn").onclick = () => {
-  i = 0;
-  totalReps = 0;
+  coreIndex = 0;
+  coreTotalReps = 0;
   render();
 };
 
@@ -328,9 +330,9 @@ function renderCalendar(){
 
     if(dateStr===todayStr) div.classList.add("today");
 
-    if(completedDays[dateStr]){
-      div.classList.add(completedDays[dateStr]>1?"multi":"done");
-      div.innerText=completedDays[dateStr];
+    if(coreCompletedDays[dateStr]){
+      div.classList.add(coreCompletedDays[dateStr]>1?"multi":"done");
+      div.innerText=coreCompletedDays[dateStr];
     } else {
       div.innerText=d;
     }
@@ -346,14 +348,14 @@ renderCalendar();
 
 // RESET LOCAL STORAGE
 document.getElementById("resetProgressBtn").onclick = () => {
-  if(confirm("Are you sure you want to reset all progress?")){
-    localStorage.removeItem("xp");
-    localStorage.removeItem("completedDays");
+  if(confirm("Are you sure you want to reset all core challenge progress?")){
+    localStorage.removeItem("core_xp");
+    localStorage.removeItem("core_completedDays");
 
-    xp = 0;
-    totalReps = 0;
-    i = 0;
-    completedDays = {};
+    coreXP = 0;
+    coreTotalReps = 0;
+    coreIndex = 0;
+    coreCompletedDays = {};
 
     updateStats();
     updateProfile();

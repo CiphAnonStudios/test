@@ -273,6 +273,13 @@ function renderCalendar(){
   document.getElementById("month").innerText =
     now.toLocaleString("default",{month:"long"})+" "+year;
 
+  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(n=>{
+    let el=document.createElement("div");
+    el.className="day-name";
+    el.innerText=n;
+    calendar.appendChild(el);
+  });
+
   let firstDay=new Date(year,month,1).getDay();
   let total=new Date(year,month+1,0).getDate();
 

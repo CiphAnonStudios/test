@@ -4,240 +4,146 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RepQuest</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      --navy: #0B1F3F;
-      --green: #00FF7F;
-      --white: #FFFFFF;
-      --light-navy: #132A5B;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
       font-family: 'Poppins', sans-serif;
-      color: var(--white);
-      background: var(--navy);
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
+      background: #0B1F3F;
     }
 
-    a {
-      text-decoration: none;
+    .glow {
+      box-shadow: 0 0 30px rgba(0,255,127,0.25);
     }
 
-    /* HERO */
-    .hero {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 80px 20px;
-      background: linear-gradient(135deg, var(--light-navy), var(--navy));
+    .green {
+      color: #00FF7F;
     }
 
-    .hero img {
-      width: 120px;
-      height: 120px;
-      margin-bottom: 20px;
-    }
-
-    .hero h1 {
-      font-size: 48px;
-      color: var(--green);
-      margin-bottom: 15px;
-    }
-
-    .hero p {
-      font-size: 20px;
-      max-width: 600px;
-      margin-bottom: 30px;
-      line-height: 1.5;
-    }
-
-    .hero .btn {
-      padding: 18px 40px;
-      background-color: var(--green);
-      color: var(--navy);
-      font-weight: 700;
-      border-radius: 12px;
-      transition: all 0.3s ease;
-      margin: 10px;
-      display: inline-block;
-    }
-
-    .hero .btn:hover {
-      transform: scale(1.08);
-      box-shadow: 0 0 25px var(--green), 0 0 50px rgba(0,255,127,0.4);
-    }
-
-    /* CARDS */
-    .sections {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      padding: 40px 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .card {
+    .glass {
       background: rgba(255,255,255,0.05);
-      padding: 30px 20px;
-      border-radius: 16px;
-      flex: 1 1 300px;
-      max-width: 350px;
-      text-align: center;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      position: relative;
-    }
-
-    .card::before {
-      content: "";
-      display: block;
-      height: 4px;
-      width: 40px;
-      background: var(--green);
-      margin: 0 auto 15px;
-      border-radius: 10px;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 25px rgba(0,0,0,0.6);
-    }
-
-    .card h2 {
-      color: var(--green);
-      margin-bottom: 15px;
-      font-size: 26px;
-    }
-
-    .card p {
-      font-size: 16px;
-      line-height: 1.5;
-    }
-
-    .card img {
-      margin-top: 15px;
-      border-radius: 10px;
-    }
-
-    /* SOCIALS */
-    .socials a {
-      display: inline-block;
-      margin: 8px 10px;
-      color: var(--white);
-      font-weight: 600;
-      font-size: 16px;
-      transition: all 0.3s ease;
-    }
-
-    .socials a:hover {
-      transform: translateY(-2px);
-      text-decoration: underline;
-    }
-
-    /* UPDATE BUTTON */
-    .update-section {
-      text-align: center;
-      margin: 20px;
-    }
-
-    /* FOOTER */
-    footer {
-      text-align: center;
-      padding: 20px;
-      background: rgba(0,0,0,0.2);
-      font-size: 14px;
-      margin-top: auto;
-    }
-
-    /* MOBILE */
-    @media(max-width: 768px) {
-      .hero h1 {
-        font-size: 36px;
-      }
-
-      .hero p {
-        font-size: 18px;
-      }
-
-      .card {
-        max-width: 90%;
-      }
+      backdrop-filter: blur(10px);
     }
   </style>
 </head>
 
-<body>
+<body class="text-white">
 
-  <!-- HERO -->
-  <section class="hero">
-    <img src="RepQuestLogo.png" alt="RepQuest Logo">
-    <h1>RepQuest</h1>
-    <p>Your strength journey starts here. Track, push, and level up with RepQuest.</p>
-
-    <a href="PushUpChallenge.html" class="btn">Push-Up Challenge</a>
-    <a href="CoreChallenge.html" class="btn">Core Challenge</a>
-    <a href="CardioChallenge.html" class="btn">Cardio Challenge</a>
-  </section>
-
-  <!-- CARDS -->
-  <section class="sections">
-
-    <div class="card">
-      <h2>What is RepQuest?</h2>
-      <p>RepQuest turns your workouts into a personal quest. Track reps, conquer challenges, and become stronger every day.</p>
+<!-- NAV -->
+<header class="fixed top-0 left-0 w-full z-50 glass border-b border-white/10">
+  <div class="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
+    
+    <div class="font-bold text-xl green">
+      RepQuest
     </div>
 
-    <div class="card">
-      <h2>About Me</h2>
-      <p>Hi, I'm Theo, a 17-year-old creator. I built RepQuest to improve my coding skills, stay consistent, and make fitness feel like a game. Glow-up, one rep at a time.</p>
-    </div>
+    <nav class="hidden md:flex gap-6 text-sm text-white/80">
+      <a href="#home" class="hover:text-green-400">Home</a>
+      <a href="#about" class="hover:text-green-400">About</a>
+      <a href="#features" class="hover:text-green-400">Features</a>
+      <a href="#socials" class="hover:text-green-400">Socials</a>
+    </nav>
 
-    <div class="card">
-      <h2>Works Everywhere</h2>
-      <svg xmlns="http://www.w3.org/2000/svg" height="40px" viewBox="0 0 24 24" width="40px" fill="#00FF7F"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M18 10h4v7h-4z" opacity=".3"/><path d="M23 8h-6c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V9c0-.55-.45-1-1-1zm-1 9h-4v-7h4v7zM4 6h18V4H4c-1.1 0-2 .9-2 2v11H0v3h14v-3H4V6z"/></svg>
-      <p>RepQuest works on phones, tablets, and desktops. Train anytime, anywhere—no downloads needed.</p>
-    </div>
+    <a href="UpdLog.html" class="px-4 py-2 rounded-xl bg-green-400 text-black font-semibold hover:scale-105 transition">
+      Updates
+    </a>
+  </div>
+</header>
 
-    <div class="card">
-      <h2>Scan to Start</h2>
-      <p>Scan this QR code to open RepQuest instantly on your phone.</p>
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://ciphanonstudios.github.io/RepQuest/" alt="QR Code">
-    </div>
+<!-- HERO -->
+<section id="home" class="pt-28 pb-20 px-6">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
 
-    <div class="card">
-      <h2>Socials</h2>
-      <div class="socials">
-        <a href="https://ciphanonstudios.github.io/RepQuest/ComingSoonPage.html" target="_blank">YouTube</a><br>
-        <a href="https://www.snapchat.com/add/t49474294" target="_blank">Snapchat</a><br>
-        <a href="https://ciphanonstudios.github.io/RepQuest/ComingSoonPage.html" target="_blank">TikTok</a>
+    <!-- LEFT -->
+    <div>
+      <p class="text-green-400 font-semibold">Train. Track. Level Up.</p>
+
+      <h1 class="text-5xl md:text-6xl font-extrabold mt-3 leading-tight">
+        RepQuest
+      </h1>
+
+      <p class="text-white/70 mt-5 text-lg max-w-md">
+        Turn workouts into a game. Complete challenges, track reps, and build consistency every day.
+      </p>
+
+      <div class="mt-8 flex flex-wrap gap-4">
+        <a href="PushUpChallenge.html" class="px-6 py-3 bg-green-400 text-black font-bold rounded-xl hover:scale-105 transition glow">
+          Push-Up
+        </a>
+        <a href="CoreChallenge.html" class="px-6 py-3 bg-white/10 rounded-xl hover:bg-white/20 transition">
+          Core
+        </a>
+        <a href="CardioChallenge.html" class="px-6 py-3 bg-white/10 rounded-xl hover:bg-white/20 transition">
+          Cardio
+        </a>
       </div>
     </div>
 
-  </section>
+    <!-- RIGHT -->
+    <div class="flex justify-center">
+      <div class="glass p-10 rounded-2xl glow text-center">
+        <img src="RepQuestLogo.png" class="w-28 mx-auto mb-4">
+        <p class="text-white/70">Your fitness journey starts here</p>
+      </div>
+    </div>
 
-  <!-- UPDATE BUTTON -->
-  <div class="update-section">
-    <a href="UpdLog.html" class="btn">Update Log</a>
   </div>
+</section>
 
-  <!-- FOOTER -->
-  <footer>
-    &copy; 2026 RepQuest. All rights reserved.
-  </footer>
+<!-- FEATURES -->
+<section id="features" class="px-6 pb-20">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-6">
+
+    <div class="glass p-6 rounded-2xl hover:scale-105 transition">
+      <h2 class="text-xl font-bold green mb-2">What is RepQuest?</h2>
+      <p class="text-white/70">A fitness system that turns workouts into quests. Track reps and progress like a game.</p>
+    </div>
+
+    <div class="glass p-6 rounded-2xl hover:scale-105 transition">
+      <h2 class="text-xl font-bold green mb-2">Works Everywhere</h2>
+      <p class="text-white/70">Phone, tablet, or desktop. No download needed—just open and train.</p>
+    </div>
+
+    <div class="glass p-6 rounded-2xl hover:scale-105 transition">
+      <h2 class="text-xl font-bold green mb-2">Scan to Start</h2>
+      <p class="text-white/70 mb-4">Open instantly on your phone.</p>
+
+      <img 
+        src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://ciphanonstudios.github.io/RepQuest/"
+        class="mx-auto rounded-xl"
+      >
+    </div>
+
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="px-6 pb-20">
+  <div class="max-w-4xl mx-auto glass p-8 rounded-2xl">
+    <h2 class="text-2xl font-bold green mb-3">About Me</h2>
+    <p class="text-white/70 leading-relaxed">
+      Hi, I'm Theo, a 17-year-old creator. I built RepQuest to improve my coding skills, stay consistent with workouts, and make fitness feel like a game. Glow-up, one rep at a time.
+    </p>
+  </div>
+</section>
+
+<!-- SOCIALS -->
+<section id="socials" class="px-6 pb-20 text-center">
+  <h2 class="text-xl font-bold green mb-6">Socials</h2>
+
+  <div class="flex justify-center gap-6">
+    <a class="hover:text-green-400" href="#">YouTube</a>
+    <a class="hover:text-green-400" href="https://www.snapchat.com/add/t49474294">Snapchat</a>
+    <a class="hover:text-green-400" href="#">TikTok</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="text-center text-white/40 py-10">
+  © 2026 RepQuest. All rights reserved.
+</footer>
 
 </body>
 </html>

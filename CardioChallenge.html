@@ -119,12 +119,13 @@ document.addEventListener("DOMContentLoaded",()=>{
 let xp = +localStorage.getItem("cardio_xp") || 0;
 let days = JSON.parse(localStorage.getItem("cardio_days") || "{}");
 
-// STATE
-let walking = false;
+// 🔥 NEW: restore session state
+let walking = JSON.parse(localStorage.getItem("cardio_walking")) || false;
+let startTime = +localStorage.getItem("cardio_startTime") || null;
+let distance = +localStorage.getItem("cardio_distance") || 0;
+
 let watchId;
-let startTime;
-let lastPos;
-let distance = 0;
+let lastPos = JSON.parse(localStorage.getItem("cardio_lastPos")) || null;
 
 // ELEMENTS
 const xpEl = document.getElementById("xp");
@@ -148,26 +149,26 @@ function updateStats(){
   streakEl.innerText = Object.keys(days).length;
 }
 
-// DISTANCE (Haversine)
+// DISTANCE
 function getDistance(lat1,lon1,lat2,lon2){
   const R = 6371;
   const dLat = (lat2-lat1)*Math.PI/180;
   const dLon = (lon2-lon1)*Math.PI/180;
 
-  const a = 
+  const a =
     Math.sin(dLat/2)**2 +
     Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
     Math.sin(dLon/2)**2;
 
   const c = 2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-  return R*c * 0.621371; // miles
+  return R*c * 0.621371;
 }
 
 // UPDATE UI
 function updateUI(){
   distanceEl.innerText = distance.toFixed(2)+" mi";
 
-  let time = (Date.now() - startTime)/60000; // minutes
+  let time = (Date.now() - startTime)/60000;
   let pace = distance > 0 ? time / distance : 0;
 
   let paceMin = Math.floor(pace);
@@ -175,13 +176,24 @@ function updateUI(){
 
   paceEl.innerText = `Pace: ${paceMin}:${String(paceSec).padStart(2,'0')} /mi`;
 
-  let calories = distance * 100; // rough
+  let calories = distance * 100;
   caloriesEl.innerText = "Calories: " + Math.floor(calories);
 
-  // COMPLETE
   if(distance >= 4){
     finishWalk();
   }
+
+  saveState();
+}
+
+// 💾 SAVE STATE (NEW CORE FIX)
+function saveState(){
+  localStorage.setItem("cardio_xp", xp);
+  localStorage.setItem("cardio_days", JSON.stringify(days));
+  localStorage.setItem("cardio_walking", walking);
+  localStorage.setItem("cardio_startTime", startTime);
+  localStorage.setItem("cardio_distance", distance);
+  localStorage.setItem("cardio_lastPos", JSON.stringify(lastPos));
 }
 
 // START
@@ -192,7 +204,12 @@ function startWalk(){
   }
 
   walking = true;
-  startTime = Date.now();
+
+  // 🔥 FIX: resume-safe startTime
+  if(!startTime){
+    startTime = Date.now();
+  }
+
   document.getElementById("btn").innerText = "Stop Walk";
   statusEl.innerText = "Tracking...";
 
@@ -213,6 +230,8 @@ function startWalk(){
   }, err=>{
     alert("Location error");
   }, {enableHighAccuracy:true});
+
+  saveState();
 }
 
 // STOP
@@ -221,13 +240,13 @@ function stopWalk(){
   navigator.geolocation.clearWatch(watchId);
   document.getElementById("btn").innerText = "Start Walk";
   statusEl.innerText = "Paused";
+  saveState();
 }
 
 // FINISH
 function finishWalk(){
   stopWalk();
 
-  // VIBRATE
   if(navigator.vibrate){
     navigator.vibrate([300,100,300]);
   }
@@ -239,24 +258,25 @@ function finishWalk(){
 
   xp += 100;
 
-  localStorage.setItem("cardio_xp", xp);
-  localStorage.setItem("cardio_days", JSON.stringify(days));
-
+  saveState();
   updateStats();
   renderCalendar();
 }
 
-// BUTTON
+// BUTTONS
 document.getElementById("btn").onclick=()=>{
   walking ? stopWalk() : startWalk();
 };
 
-// RESET
 document.getElementById("resetBtn").onclick=()=>{
   stopWalk();
   distance = 0;
   lastPos = null;
-  distanceEl.innerText = "0.00 mi(4mi)";
+  startTime = null;
+
+  saveState();
+
+  distanceEl.innerText = "0.00 mi";
   paceEl.innerText = "Pace: 0:00 /mi";
   caloriesEl.innerText = "Calories: 0";
 };
@@ -272,13 +292,6 @@ function renderCalendar(){
 
   document.getElementById("month").innerText =
     now.toLocaleString("default",{month:"long"})+" "+year;
-
-  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(n=>{
-    let el=document.createElement("div");
-    el.className="day-name";
-    el.innerText=n;
-    calendar.appendChild(el);
-  });
 
   let firstDay=new Date(year,month,1).getDay();
   let total=new Date(year,month+1,0).getDate();
@@ -305,7 +318,12 @@ function renderCalendar(){
   }
 }
 
-// INIT
+// 🔥 RESTORE ON LOAD
+if(walking && startTime){
+  statusEl.innerText = "Resuming...";
+  startWalk();
+}
+
 updateStats();
 renderCalendar();
 
